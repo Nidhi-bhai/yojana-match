@@ -332,7 +332,7 @@ def index_page(payload, categories, states):
       <h2 data-i18n="helpTitle">Application help pack</h2>
       <p class="price">$2</p>
       <p data-i18n="helpBody">Optional $2 PDF of your confirmed matches: documents, apply link, and source. It is the same checklist already shown free on this page. It is in English. It is not a form-filling service and it does not guarantee approval.</p>
-      <p data-i18n="helpFree">The PDF is the same checklist as the free list on this page. Paying does not add schemes or file an application. You can use the on-page list without PayPal, including from India where PayPal may not take the payment.</p>
+      <p data-i18n="helpFree">PayPal can't take payments from buyers in India. The full checklist is free on this page.</p>
       <p data-i18n="helpEnglish">The PDF is in English.</p>
       <p data-i18n="helpRefund">For a refund, email nidhi69n@gmail.com with your PayPal order id.</p>
       <div id="paypal-button"></div>
@@ -356,7 +356,7 @@ def index_page(payload, categories, states):
     <script src="js/app.js"></script>
     """
     description = (
-        "Answer eight questions and see which of 239 copied schemes may fit. "
+        "Answer 10 questions and see which of 239 copied schemes may fit. "
         "Documents and official links. Unofficial; verify on myScheme."
     )
     return page(
@@ -513,9 +513,9 @@ def about_page():
     <p>The database is a structured subset of schemes published on <a href="https://www.myscheme.gov.in/">myScheme</a>, the official scheme portal maintained for the Government of India. Each record keeps the official name, eligibility text, benefits text, documents, an apply link when myScheme lists one, the source URL, and the date the record was checked.</p>
     <p>If the official page does not state a single benefit amount, that field is left blank. Amounts are not estimated.</p>
     <p>The catalogue has 239 schemes copied from myScheme on 2026-10-27. It is a subset, not every scheme in India. “Copied from myScheme on” is the copy date, not a claim that every link was checked by hand.</p>
-    <p>A scheme is a confirmed match only when the structured rules fit: state, age, gender, category, occupation, disability, income ceiling, student-only, and the optional questions for ex-servicemen, freedom fighters, orphans, widows, police wards, and ration card / SECC / below-poverty-line status. Scholarships are treated as student-only. A close date before 2026-10-27 removes the scheme from matches and from the PDF. Its page shows a closed badge.</p>
+    <p>A scheme is confirmed only when every eligibility condition in the official text maps to a question the form asks: state, age, gender, category, occupation, disability, income band, and the optional questions for ex-servicemen, freedom fighters, orphans, widows, police wards, and ration card / SECC / below-poverty-line status. Scholarships are treated as student-only. A close date before 2026-10-27 removes the scheme from matches and from the PDF. Its page shows a closed badge.</p>
     <p>Where the official text states a further condition this form does not ask, the scheme is listed under “Possibly eligible, check conditions”. That section is not a match and it is not put in the PDF.</p>
-    <p>The optional $2 PDF is the same English checklist already shown free on the page. Email nidhi69n@gmail.com with the PayPal order id for a refund or a second copy.</p>
+    <p>The optional $2 PDF is the same English checklist already shown free on the page. PayPal can't take payments from buyers in India. The full checklist is free on the page. Email nidhi69n@gmail.com with the PayPal order id for a refund or a second copy.</p>
     <p lang="hi">योजनामैच सरकारी वेबसाइट नहीं है। आवेदन से पहले आधिकारिक स्रोत पर जाँच करें।</p>
     <p lang="te">యోజనామ్యాచ్ ప్రభుత్వ వెబ్‌సైట్ కాదు. దరఖాస్తుకు ముందు అధికారిక మూలంలో ధృవీకరించండి.</p>
     """

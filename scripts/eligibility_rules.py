@@ -42,7 +42,7 @@ AGE_MAX_RE = re.compile(
     re.I,
 )
 
-# Extra conditions the eight answers cannot settle. The quote is the official sentence.
+# Extra conditions the form answers cannot settle. The quote is the official sentence.
 UNCERTAIN_PATTERNS = [
     ("bank-account", re.compile(r"bank account holder|have a (?:savings )?bank account|having a bank account", re.I)),
     ("merit", re.compile(r"top\s*1\s*%|\bmarks\b|grade point|\d+\s*%|JEE|AIPMT", re.I)),
@@ -66,6 +66,63 @@ UNCERTAIN_PATTERNS = [
     ("identity", re.compile(r"\bunmarried\b|\bdestitute\b|minority community|girl child|Self-Help Group|retired government|cluster housing", re.I)),
 ]
 
+# A confirmed match is allowed only when every eligibility sentence is one of these.
+# A sentence that also contains UNMAPPED_RE is still open, even if it mentions age or a state.
+COVERED_RE = re.compile(
+    r"\b(age|aged)\b|\byears of age\b|\b\d{1,3}\s*years\b|"
+    r"\b(resid\w*|native|domicile|citizen of India)\b|"
+    r"\bwidows?\b|husband has died|"
+    r"\b(women|woman|female|male)\b|"
+    r"\brural\b|\burban\b|"
+    r"\bfarmers?\b|"
+    r"scheduled caste|scheduled tribe|other backward|"
+    r"poverty line|\bBPL\b|"
+    r"annual income|income should|income of the applicant|income limit|no annual income limit|"
+    r"there (?:is|are) no\b|"
+    r"\bdisabilit",
+    re.I,
+)
+UNMAPPED_RE = re.compile(
+    r"deceased|suicide|cause of death|family member|dependent of the|"
+    r"abandoned|divorced|"
+    r"remarriage|bridegroom|\bmarriage\b|"
+    r"conceiv|first child|first time|pregnan|under the age of 2|"
+    r"ashram|vridh|old[- ]age home|"
+    r"brahmin|pourohityam|veda parayanam|archakatvam|vaidik|"
+    r"primitive tribal|particularly vulnerable|"
+    r"\bcancer\b|kidney|liver|\bleprosy\b|"
+    r"income tax|"
+    r"government employee|public sector job|"
+    r"bank account|"
+    r"other pension|social security scheme|similar scheme|any other .{0,40}scheme|"
+    r"kutcha|houseless|awaas|housing scheme|"
+    r"\bacres?\b|\bhectares?\b|\bland\b|"
+    r"small and marginal|"
+    r"samagra|anganwadi|aspirational|"
+    r"aadhaar|aadhar|"
+    r"minimum of \d+ years|lived for \d+|residing for \d+|"
+    r"\bdaughters?\b|only girl|only daughter|"
+    r"world war|veteran|"
+    r"40\s*percent|40\s*%|percentage of disability|"
+    r"within one year|sixty days|"
+    r"nav-buddha|minority category|"
+    r"acid attack|consecutive years|"
+    r"\bmarried\b|"
+    r"\bportal\b|"
+    r"BIS-marked|direct benefit transfer|"
+    r"regular income|"
+    r"beneficiary of|"
+    r"enrolled in|"
+    r"full-time employee|"
+    r"free maintenance|"
+    r"male head|"
+    r"specified illness|"
+    r"one person in the family|"
+    r"municipal",
+    re.I,
+)
+HEADING_RE = re.compile(r"[\W\d\s]*(eligibility|benefits|note|criteria)[\W\s]*", re.I)
+
 
 def _sentences(text):
     cleaned = clean_text(text)
@@ -78,6 +135,110 @@ def _sentences(text):
         if len(sentence) >= 12:
             sentences.append(sentence[:280])
     return sentences
+
+
+def _stated_age_bounds(sentence):
+    """Read a numeric age window from one official sentence.
+
+    Returns (age_min, age_max), with either end None when that end is open.
+    Returns "unparsed" when the sentence is an age rule but the numbers cannot
+    be read. Returns None when the sentence is not an age rule.
+    """
+    if not re.search(r"\b(age|aged)\b", sentence, re.I):
+        return None
+    # A child's, bride's, or bridegroom's age is not the applicant's age.
+    if re.search(r"\b(child|children|son|daughter|baby|infant|bridegroom|bride)\b", sentence, re.I):
+        return None
+    pair = re.search(
+        r"(?:between|age group of|group of)\s*(\d{1,3})\s*(?:and|to|-|–)\s*(\d{1,3})",
+        sentence,
+        re.I,
+    )
+    if not pair:
+        pair = re.search(r"\b(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})\s*years\b", sentence, re.I)
+    if pair:
+        low, high = int(pair.group(1)), int(pair.group(2))
+        if 0 <= low <= high <= 150:
+            return low, high
+        return "unparsed"
+    minimum = re.search(
+        r"(?:at least|above|older than|not be less than|not less than|minimum age of)\s*(\d{1,3})",
+        sentence,
+        re.I,
+    )
+    if not minimum:
+        minimum = re.search(
+            r"\b(\d{1,3})\s*years(?:\s+of age)?\s*(?:or above|and above|or more|or older)",
+            sentence,
+            re.I,
+        )
+    maximum = None
+    if not re.search(r"not be less than|not less than|at least|or above|and above|or more|or older", sentence, re.I):
+        maximum = AGE_MAX_RE.search(sentence)
+    age_min = int(minimum.group(1)) if minimum else None
+    age_max = int(maximum.group(1)) if maximum else None
+    if age_min is None and age_max is None:
+        return "unparsed" if re.search(r"\d", sentence) else None
+    if age_min is not None and not 0 <= age_min <= 120:
+        return "unparsed"
+    if age_max is not None and not 0 <= age_max <= 150:
+        return "unparsed"
+    return age_min, age_max
+
+
+def _apply_stated_ages(criteria, sentences):
+    """Fill a missing age bound from the official sentence. Return sentences that stay open."""
+    open_sentences = []
+    for field, quote_field in (("ageMin", "ageMinQuote"), ("ageMax", "ageMaxQuote")):
+        quote = criteria.get(quote_field) or ""
+        if quote and _stated_age_bounds(quote) is None and re.search(r"\b(age|aged)\b", quote, re.I):
+            criteria[field] = None
+            criteria[quote_field] = ""
+    for sentence in sentences:
+        parsed = _stated_age_bounds(sentence)
+        if parsed is None:
+            continue
+        if parsed == "unparsed":
+            if criteria.get("ageMin") in (None, "") and criteria.get("ageMax") in (None, ""):
+                open_sentences.append(sentence)
+            continue
+        low, high = parsed
+        if low is not None and criteria.get("ageMin") in (None, ""):
+            criteria["ageMin"] = low
+            criteria["ageMinQuote"] = sentence
+        # 120 and above is not a real cap: the form stops at 120.
+        if high is not None and high < 120 and criteria.get("ageMax") in (None, ""):
+            criteria["ageMax"] = high
+            criteria["ageMaxQuote"] = sentence
+        min_missing = low is not None and criteria.get("ageMin") in (None, "")
+        max_missing = high is not None and high < 120 and criteria.get("ageMax") in (None, "")
+        if min_missing or max_missing:
+            open_sentences.append(sentence)
+    return open_sentences
+
+
+def _sentence_unmapped(sentence):
+    """True when this official sentence is not settled by a form answer."""
+    text = sentence.strip()
+    if HEADING_RE.fullmatch(text):
+        return False
+    if UNMAPPED_RE.search(text):
+        return True
+    return COVERED_RE.search(text) is None
+
+
+def _unmapped_quotes(scheme, sentences):
+    """Eligibility sentences, plus a brief line that states an income-tax bar."""
+    quotes = []
+    seen = set()
+    brief = ((scheme.get("brief") or {}).get("en")) or ""
+    extra = [sentence for sentence in _sentences(brief) if re.search(r"income tax", sentence, re.I)]
+    for sentence in list(sentences) + extra:
+        if not _sentence_unmapped(sentence) or sentence in seen:
+            continue
+        seen.add(sentence)
+        quotes.append(sentence)
+    return quotes
 
 
 def _first_quote(sentences, pattern):
@@ -117,6 +278,8 @@ def annotate_scheme(scheme):
                 criteria["ageMin"] = int(match.group(1))
                 criteria["ageMinQuote"] = sentence
                 break
+
+    open_age_sentences = _apply_stated_ages(criteria, sentences)
 
     if re.search(r"pre[-\s]?matric", name, re.I) and criteria.get("ageMax") in (None, ""):
         for sentence in sentences:
@@ -184,6 +347,15 @@ def annotate_scheme(scheme):
         uncertain.append({"code": code, "quote": quote})
     if criteria.get("studentOnly") and not any(item["code"] == "course" for item in uncertain):
         uncertain.append({"code": "course", "quote": name.strip()[:240]})
+    for quote in open_age_sentences:
+        if quote not in {item.get("quote") for item in uncertain}:
+            uncertain.append({"code": "unmapped", "quote": quote})
+    seen_quotes = {item["quote"] for item in uncertain}
+    for quote in _unmapped_quotes(scheme, sentences):
+        if quote in seen_quotes:
+            continue
+        seen_quotes.add(quote)
+        uncertain.insert(0, {"code": "unmapped", "quote": quote})
     criteria["uncertain"] = uncertain[:8]
 
     scheme["criteria"] = criteria

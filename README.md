@@ -35,18 +35,18 @@ A scheme is a confirmed match only when every structured rule fits. Anything the
 - Ration card, family card, SECC, and below-poverty-line schemes follow the yes / no / not sure answer. “Not sure”, and a yes that still leaves a deprivation list, stay in the check section.
 - An income ceiling is stored only when the eligibility text states one. A band that sits entirely above the ceiling is excluded. A band that crosses it is a check, not a match.
 - A myScheme close date before 2026-10-27 removes the scheme from matches and from the PDF. The page shows a closed badge. Stand-Up India (2025-03-31), Mukhyamantri Aawasiye Bhu-Adhikaar Yojana (2023-05-31), and the 2021 Ujjwala record are closed. The 2021 record’s text describes Ujjwala 2.0, which is the separate open record.
-- If the official text still states land, a bank account, a course, rank, pregnancy, or another condition the form does not ask, the scheme is a check. The sentence is kept next to it.
+- A scheme is confirmed only when every eligibility sentence maps to a question the form asks. Land, a bank account, a course, rank, pregnancy, a death in the family, caste details the form does not list, or any other unasked condition keeps the scheme in the check section. The sentence is kept next to it.
 - A scheme with no real restriction, such as Jan Dhan, is a check rather than a match for everyone.
 
 ## Five checked profiles
 
 These are asserted in `tests/profiles.json` by `node --test tests/match.test.js`. The same file also sweeps 5,040 profiles and fails if any scheme is a confirmed match for 80 percent or more of them.
 
-1. **Rural Uttar Pradesh farmer.** Man, 40, general category, income under ₹1 lakh, no disability. Confirmed matches include Atal Pension Yojana, MGNREGA, and Per Drop More Crop. PM-KISAN, Fasal Bima, Kisan Credit Card, and PMSBY are checks because of land or a bank account. Scholarships, the freedom-fighter pension, and closed Stand-Up India are excluded.
-2. **Urban Bihar SC student.** Woman, 18, income under ₹1 lakh. The ICAR scholarship and INSPIRE are checks, not confirmed matches. Farmer schemes, Swanath, and Nekar Samman are excluded.
-3. **Urban Maharashtra woman entrepreneur.** Woman, 32, general category, income ₹2.5–5 lakh. Stand-Up India is closed and excluded. PMSBY, Matru Vandana, and PM-JAY are checks. The 2021 Ujjwala record is closed.
+1. **Rural Uttar Pradesh farmer.** Man, 40, general category, income under ₹1 lakh, no disability. MGNREGA is the confirmed match. Atal Pension Yojana, Per Drop More Crop, PM-KISAN, Fasal Bima, Kisan Credit Card, and PMSBY are checks. Scholarships, the freedom-fighter pension, and closed Stand-Up India are excluded.
+2. **Urban Bihar SC student.** Woman, 18, income under ₹1 lakh. Atal Pension Yojana, the ICAR scholarship, and INSPIRE are checks. Farmer schemes, Swanath, and Nekar Samman are excluded.
+3. **Urban Maharashtra woman entrepreneur.** Woman, 32, general category, income ₹2.5–5 lakh. Stand-Up India is closed and excluded. Atal Pension Yojana, PMSBY, Matru Vandana, and PM-JAY are checks. The 2021 Ujjwala record is closed.
 4. **Rural Karnataka senior with a disability.** Man, 67, OBC, unemployed, income under ₹1 lakh, and he says he is on a below-poverty-line list. MGNREGA matches. The Indira Gandhi disability pension stays a check because the page states a disability percentage. Nekar Samman stays a check because it is for weavers.
-5. **Rural Telangana ST farmer.** Woman, 29, income ₹1–2.5 lakh. The Telangana ₹5 lakh farmer insurance matches. PM-KISAN, Fasal Bima, Kisan Credit Card, and Rythu Bima are checks because of land records. Stand-Up India is closed.
+5. **Rural Telangana ST farmer.** Woman, 29, income ₹1–2.5 lakh. MGNREGA and the Telangana ₹5 lakh farmer insurance match. Atal Pension Yojana is a check because joining needs a savings account and excludes income-tax payers. PM-KISAN, Fasal Bima, Kisan Credit Card, and Rythu Bima are checks because of land records. Stand-Up India is closed.
 
 ## Pages and search
 
@@ -56,7 +56,7 @@ Live URL, once Pages is enabled: <https://nidhi-bhai.github.io/yojana-match/>
 
 ## Payments
 
-`docs/config.js` sets `PAYPAL_CLIENT_ID`. The $2 PDF is the same English checklist already shown free on the page. It lists confirmed matches only. After payment, the PayPal order id and the answers are stored in the browser, and “Download again” rebuilds the file. The PDF names nidhi69n@gmail.com for a refund. The ad slot is omitted until a publisher id exists.
+`docs/config.js` sets `PAYPAL_CLIENT_ID`. PayPal can't take payments from buyers in India. The full checklist is free on the page. The $2 PDF is that same English checklist. It lists confirmed matches only. After payment, the PayPal order id and the answers are stored in the browser, and “Download again” rebuilds the file. The PDF names nidhi69n@gmail.com for a refund. The ad slot is omitted until a publisher id exists.
 
 `python3 scripts/check_links.py` requests every apply and reference URL. A 404 or 410 fails the run. Timeouts and non-404 HTTP errors are reported as unverified, because many government sites refuse a connection from outside India. `python3 scripts/check_links.py --local` checks the catalog for known 404s and for unofficial domains without making requests. Confirmed 404 references are removed. A dead apply link is pointed at that scheme’s myScheme page.
 
