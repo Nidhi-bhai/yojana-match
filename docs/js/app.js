@@ -6,7 +6,9 @@
   var catalog = [];
   var lastProfile = null;
   var lastMatches = [];
+  var lastPossible = [];
   var paypalReady = false;
+  var ORDER_KEY = "yojana-help-orders";
 
   function t(key) {
     var pack = i18n.STRINGS[lang] || i18n.STRINGS.en;
@@ -42,10 +44,17 @@
         node.textContent = t("choose");
         return;
       }
-      node.textContent = stateLabel(node.value);
+      var label = stateLabel(node.value);
+      if (node.getAttribute("data-central-only") === "true") {
+        label += " (" + t("centralOnly") + ")";
+      }
+      node.textContent = label;
     });
     document.querySelectorAll("[data-lang]").forEach(function (button) {
       button.setAttribute("aria-pressed", button.getAttribute("data-lang") === lang ? "true" : "false");
+    });
+    document.querySelectorAll(".te-note").forEach(function (node) {
+      node.hidden = lang !== "te";
     });
     var search = document.getElementById("result-search");
     if (search) search.placeholder = t("searchResults");
@@ -54,6 +63,7 @@
   function readProfile(form) {
     var data = new FormData(form);
     var age = Number(data.get("age"));
+    var groups = data.getAll("group");
     var profile = {
       state: data.get("state") || "",
       age: age,
@@ -63,6 +73,8 @@
       caste: data.get("caste") || "",
       disability: data.get("disability") === "yes",
       residence: data.get("residence") || "",
+      groups: groups,
+      listing: data.get("listing") || "",
     };
     var missing =
       !profile.state ||
@@ -71,32 +83,51 @@
       !profile.occupation ||
       !profile.caste ||
       !profile.residence ||
+      !profile.listing ||
       !Number.isFinite(age) ||
       age < 0 ||
       age > 120;
     return { profile: profile, missing: missing };
   }
 
-  function notesFor(result) {
-    return result.notes
-      .map(function (note) {
-        if (note === "income-check") return t("checkIncome");
-        if (note === "bpl-check") return t("checkBpl");
-        if (note === "woman-entrepreneur-gender") return t("womanNote");
+  function loadOrders() {
+    try {
+      var parsed = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveOrder(entry) {
+    var orders = loadOrders().filter(function (item) {
+      return item.orderID !== entry.orderID;
+    });
+    orders.unshift(entry);
+    localStorage.setItem(ORDER_KEY, JSON.stringify(orders.slice(0, 8)));
+  }
+
+  function checksFor(result) {
+    return (result.checks || [])
+      .map(function (check) {
+        if (check.code === "broad") return t("checkBroad");
+        if (check.code === "listing" || check.code === "listing-detail") return t("checkListing");
+        if (check.code === "income-check") return t("checkIncome");
+        if (check.quote) return t("checkQuote") + " " + check.quote;
         return "";
       })
       .filter(Boolean);
   }
 
-  function card(scheme) {
+  function card(scheme, kind) {
     var result = matcher.explain(scheme, lastProfile);
     var name = textOf(scheme.name);
     var benefit = scheme.benefitAmount || t("benefitUnknown");
     var eligibility = textOf(scheme.eligibility);
     if (eligibility.length > 500) eligibility = eligibility.slice(0, 500) + "…";
-    var docs = (scheme.documents && (scheme.documents[lang] || []).length
+    var docs = scheme.documents && (scheme.documents[lang] || []).length
       ? scheme.documents[lang]
-      : (scheme.documents && scheme.documents.en) || []);
+      : (scheme.documents && scheme.documents.en) || [];
     var apply = (scheme.applyLinks || [])[0];
     var href = "schemes/" + encodeURIComponent(scheme.slug) + "/";
     var badges =
@@ -106,13 +137,16 @@
         .slice(0, 2)
         .map(function (state) { return '<span class="badge clay">' + esc(stateLabel(state)) + "</span>"; })
         .join("");
+    if (matcher.isClosed(scheme)) {
+      badges += '<span class="badge closed">' + esc(t("closedBadge")) + "</span>";
+    }
     var docHtml = docs.length
       ? "<ul class=\"doc-list\">" + docs.slice(0, 4).map(function (doc) { return "<li>" + esc(doc) + "</li>"; }).join("") + "</ul>"
       : "<p class=\"meta\">" + esc(t("documentsMissing")) + "</p>";
-    var noteHtml = notesFor(result).map(function (note) { return "<p class=\"note\">" + esc(note) + "</p>"; }).join("");
-    var closeHtml = scheme.closeDate
-      ? "<p class=\"meta\">" + esc(t("closed")) + ": " + esc(scheme.closeDate) + "</p>"
-      : "";
+    var noteSource = kind === "possible" ? checksFor(result) : [];
+    var noteHtml = noteSource.slice(0, 3).map(function (note) {
+      return "<p class=\"note\">" + esc(note) + "</p>";
+    }).join("");
     var applyHtml = apply
       ? '<a class="button" href="' + esc(apply.url) + '" rel="noopener noreferrer">' + esc(t("apply")) + "</a>"
       : "<span class=\"meta\">" + esc(t("applyMissing")) + "</span>";
@@ -124,7 +158,6 @@
       "</div></header>" +
       "<p class=\"benefit\">" + esc(benefit) + "</p>" +
       noteHtml +
-      closeHtml +
       "<h4>" + esc(t("eligibility")) + "</h4>" +
       "<p>" + esc(eligibility || "—") + "</p>" +
       "<h4>" + esc(t("documents")) + "</h4>" +
@@ -138,43 +171,93 @@
     );
   }
 
-  function renderResults() {
-    var root = document.getElementById("results");
+  function visible(rows) {
     var query = (document.getElementById("result-search").value || "").trim().toLowerCase();
     var filter = document.getElementById("result-filter").value;
-    var rows = lastMatches.filter(function (scheme) {
+    return rows.filter(function (scheme) {
       var name = textOf(scheme.name).toLowerCase();
       if (query && name.indexOf(query) === -1 && scheme.slug.indexOf(query) === -1) return false;
       if (filter === "central") return scheme.level === "Central";
       if (filter === "state") return scheme.level !== "Central";
       return true;
     });
+  }
+
+  function groupHtml(rows, kind) {
     var stateRows = rows.filter(function (scheme) { return scheme.level !== "Central"; });
     var centralRows = rows.filter(function (scheme) { return scheme.level === "Central"; });
+    var html = "";
+    if (stateRows.length) {
+      html += "<h3 class=\"group-title\">" + esc(t("groupState")) + "</h3><div class=\"card-list\">" +
+        stateRows.map(function (scheme) { return card(scheme, kind); }).join("") + "</div>";
+    }
+    if (centralRows.length) {
+      html += "<h3 class=\"group-title\">" + esc(t("groupCentral")) + "</h3><div class=\"card-list\">" +
+        centralRows.map(function (scheme) { return card(scheme, kind); }).join("") + "</div>";
+    }
+    return html;
+  }
+
+  function renderResults() {
+    var root = document.getElementById("results");
+    var matches = visible(lastMatches);
+    var possible = visible(lastPossible);
     var html = '<div class="results-head"><h2>' + esc(t("resultsTitle")) + "</h2><p><strong>" +
-      rows.length + "</strong> " + esc(t("matchCount")) + "</p></div>";
-    if (!rows.length) {
+      matches.length + "</strong> " + esc(t("matchCount")) + "</p></div>";
+    if (!matches.length) {
       html += '<p class="empty">' + esc(t("noResults")) + "</p>";
     } else {
-      if (stateRows.length) {
-        html += "<h3 class=\"group-title\">" + esc(t("groupState")) + "</h3><div class=\"card-list\">" +
-          stateRows.map(card).join("") + "</div>";
-      }
-      if (centralRows.length) {
-        html += "<h3 class=\"group-title\">" + esc(t("groupCentral")) + "</h3><div class=\"card-list\">" +
-          centralRows.map(card).join("") + "</div>";
-      }
+      html += groupHtml(matches, "match");
     }
+    html += '<div class="results-head"><h2>' + esc(t("possibleTitle")) + "</h2><p><strong>" +
+      possible.length + "</strong> " + esc(t("possibleCount")) + "</p></div>";
+    html += "<p class=\"meta\">" + esc(t("possibleIntro")) + "</p>";
+    if (possible.length) html += groupHtml(possible, "possible");
     root.innerHTML = html;
+  }
+
+  function downloadOrder(order) {
+    var matched = matcher.matchAll(catalog, order.profile);
+    pdf.downloadPdf(
+      pdf.buildChecklistPdf(order.profile, matched, order.orderID),
+      "yojanamatch-application-help-pack.pdf"
+    );
+  }
+
+  function renderSavedOrders() {
+    var box = document.getElementById("saved-orders");
+    if (!box) return;
+    var orders = loadOrders();
+    if (!orders.length) {
+      box.innerHTML = "";
+      return;
+    }
+    box.innerHTML = orders.map(function (order) {
+      return '<p class="order-row"><span>' + esc(t("orderLabel")) + ": <strong>" + esc(order.orderID) +
+        "</strong></span> <button type=\"button\" class=\"secondary\" data-order=\"" + esc(order.orderID) +
+        "\">" + esc(t("downloadAgain")) + "</button></p>";
+    }).join("");
+    box.querySelectorAll("[data-order]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.getAttribute("data-order");
+        var order = loadOrders().filter(function (item) { return item.orderID === id; })[0];
+        if (order) downloadOrder(order);
+      });
+    });
   }
 
   function setupPaypal() {
     var slot = document.getElementById("paypal-button");
     var note = document.getElementById("paypal-note");
     slot.innerHTML = "";
-    if (!lastMatches.length) {
+    if (!lastProfile) {
       note.hidden = false;
       note.textContent = t("helpNeedsMatch");
+      return;
+    }
+    if (!lastMatches.length) {
+      note.hidden = false;
+      note.textContent = t("helpNoFirm");
       return;
     }
     var config = window.YOJANA_CONFIG || {};
@@ -201,8 +284,28 @@
         },
         onApprove: function (data, actions) {
           return actions.order.capture().then(function () {
-            pdf.downloadPdf(pdf.buildChecklistPdf(profile, matched), "yojanamatch-application-help-pack.pdf");
+            var order = {
+              orderID: data.orderID,
+              profile: profile,
+              savedAt: new Date().toISOString(),
+            };
+            saveOrder(order);
+            renderSavedOrders();
+            note.hidden = false;
+            note.textContent = t("orderLabel") + ": " + data.orderID;
+            pdf.downloadPdf(
+              pdf.buildChecklistPdf(profile, matched, data.orderID),
+              "yojanamatch-application-help-pack.pdf"
+            );
           });
+        },
+        onCancel: function () {
+          note.hidden = false;
+          note.textContent = t("paypalCancel");
+        },
+        onError: function () {
+          note.hidden = false;
+          note.textContent = t("paypalError");
         },
       }).render("#paypal-button");
     }
@@ -238,6 +341,7 @@
     error.textContent = "";
     lastProfile = parsed.profile;
     lastMatches = matcher.matchAll(catalog, lastProfile);
+    lastPossible = matcher.possibleAll(catalog, lastProfile);
     renderResults();
     setupPaypal();
     document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -252,6 +356,7 @@
         renderResults();
         setupPaypal();
       }
+      renderSavedOrders();
     });
   });
 
@@ -269,6 +374,7 @@
     .then(function (payload) {
       catalog = payload.schemes || [];
       document.getElementById("loading").hidden = true;
+      renderSavedOrders();
     })
     .catch(function () {
       document.getElementById("loading").textContent = "The scheme database did not load.";

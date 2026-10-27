@@ -35,13 +35,17 @@
     return lines;
   }
 
-  function checklistLines(profile, schemes) {
+  function checklistLines(profile, schemes, orderId) {
     var lines = [
       "YojanaMatch application help pack",
-      "A document checklist generated from your matches. USD 2.",
+      "This PDF is in English.",
+      "A document checklist of confirmed matches. USD 2.",
+      "The same checklist is free on the YojanaMatch page. This file does not add schemes or file an application.",
+      orderId ? "PayPal order id: " + orderId : "PayPal order id: not supplied",
       "",
       "This is not a government website and this file is not an application.",
       "It does not guarantee approval. Verify every scheme on the official portal before you apply.",
+      "For a refund, email nidhi69n@gmail.com with your PayPal order id.",
       "",
       "Profile",
       "State: " + (profile.state || ""),
@@ -73,9 +77,15 @@
       var apply = (scheme.applyLinks || [])[0];
       lines.push("Apply: " + (apply && apply.url ? apply.url : "Apply link not listed."));
       lines.push("Source: " + (scheme.sourceUrl || ""));
-      lines.push("Last verified: " + (scheme.lastVerified || ""));
+      lines.push("Copied from myScheme on " + (scheme.lastVerified || ""));
     });
+    if (!schemes.length) {
+      lines.push("");
+      lines.push("No confirmed match was saved for this profile.");
+      lines.push("Schemes that still need a condition check are free on the page and are not listed here as matches.");
+    }
     lines.push("");
+    lines.push("Contact: nidhi69n@gmail.com");
     lines.push("Built by Nidhi Karuturi. https://github.com/Nidhi-bhai");
     return lines;
   }
@@ -84,9 +94,9 @@
     return latin(value).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
   }
 
-  function buildChecklistPdf(profile, schemes) {
+  function buildChecklistPdf(profile, schemes, orderId) {
     var wrapped = [];
-    checklistLines(profile, schemes).forEach(function (line) {
+    checklistLines(profile, schemes, orderId).forEach(function (line) {
       var bits = wrap(line, 92);
       if (!bits.length) wrapped.push("");
       else wrapped = wrapped.concat(bits);

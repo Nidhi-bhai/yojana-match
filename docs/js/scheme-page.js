@@ -17,6 +17,9 @@
     document.querySelectorAll("[data-lang]").forEach(function (button) {
       button.setAttribute("aria-pressed", button.getAttribute("data-lang") === lang ? "true" : "false");
     });
+    document.querySelectorAll(".te-note").forEach(function (node) {
+      node.hidden = lang !== "te";
+    });
     if (!copy) return;
     document.querySelectorAll("[data-scheme]").forEach(function (node) {
       var key = node.getAttribute("data-scheme");

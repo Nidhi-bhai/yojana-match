@@ -1,7 +1,7 @@
 [
   {
     "id": "up-farmer",
-    "summary": "A 40-year-old general-category male farmer in rural Uttar Pradesh, family income under ₹1 lakh, no disability.",
+    "summary": "A 40-year-old general-category male farmer in rural Uttar Pradesh, family income under ₹1 lakh, no disability, not sure about a ration card.",
     "profile": {
       "state": "Uttar Pradesh",
       "age": 40,
@@ -10,11 +10,14 @@
       "occupation": "farmer",
       "caste": "general",
       "disability": false,
-      "residence": "Rural"
+      "residence": "Rural",
+      "groups": [],
+      "listing": "not-sure"
     },
-    "mustInclude": ["pm-kisan", "pmfby", "kcc", "pmsby"],
-    "mustExclude": ["post-st", "pmmvy", "sui", "icar-pms-scstc", "igndpstn", "dpyup", "lpsup"],
-    "why": "PM-KISAN, PM Fasal Bima, and Kisan Credit Card are central farmer schemes. PMSBY is open at age 40. The ST post-matric scholarship, Matru Vandana (women), Stand-Up India (he is not SC/ST), the ICAR SC/ST scholarship, Tamil Nadu disability pension, UP divyang pension, and the UP leprosy pension do not fit."
+    "mustMatch": ["apy", "mgnrega", "pmksypdmc"],
+    "mustPossible": ["pm-kisan", "pmfby", "kcc", "pmsby"],
+    "mustExclude": ["post-st", "pmmvy", "sui", "icar-pms-scstc", "igndpstn", "dpyup", "lpsup", "aicte-ssss", "inspire-she", "sssps"],
+    "why": "Atal Pension Yojana fits ages 18 to 40. MGNREGA fits a rural adult. Per Drop More Crop fits a rural farmer. PM-KISAN, Fasal Bima, and Kisan Credit Card stay in the check section because the official text requires land or cultivator status. PMSBY needs a bank account. Scholarships, the freedom-fighter pension, Stand-Up India (closed 2025-03-31), maternity, and other states' pensions are excluded."
   },
   {
     "id": "bihar-sc-student",
@@ -27,11 +30,14 @@
       "occupation": "student",
       "caste": "sc",
       "disability": false,
-      "residence": "Urban"
+      "residence": "Urban",
+      "groups": [],
+      "listing": "not-sure"
     },
-    "mustInclude": ["icar-pms-scstc"],
-    "mustExclude": ["pm-kisan", "kcc", "pmmvy", "sui", "post-st", "ssscsitipcsvs", "nsy"],
-    "why": "The ICAR post-matric scholarship is for SC/ST students aged 18 to 35. Farmer schemes, Matru Vandana (official age filter starts at 21), Stand-Up India (self-employment), the ST-only post-matric scholarship, a Gujarat SC scholarship, and a Karnataka weaver scheme do not fit. The ICAR page still requires admission in an agricultural university."
+    "mustMatch": ["apy"],
+    "mustPossible": ["icar-pms-scstc", "inspire-she"],
+    "mustExclude": ["pm-kisan", "kcc", "pmmvy", "sui", "post-st", "ssscsitipcsvs", "nsy", "aicte-ssss"],
+    "why": "The ICAR scholarship and INSPIRE are shown to check, because admission or rank is still unconfirmed, and they are not confirmed matches. Farmer schemes, Matru Vandana, the closed Stand-Up India scheme, the ST-only scholarship, a Gujarat SC scholarship, Swanath (she did not opt in as an orphan), and Karnataka's weaver scheme do not fit."
   },
   {
     "id": "mh-woman-entrepreneur",
@@ -44,15 +50,18 @@
       "occupation": "woman_entrepreneur",
       "caste": "general",
       "disability": false,
-      "residence": "Urban"
+      "residence": "Urban",
+      "groups": [],
+      "listing": "not-sure"
     },
-    "mustInclude": ["sui", "pmsby"],
-    "mustExclude": ["pm-kisan", "kcc", "post-st", "pmfby", "sasgj", "pmuy"],
-    "why": "Stand-Up India matches because the official text says a male applicant must be SC/ST, so a woman is not limited to those categories, and the employment facet is self-employed. PMSBY covers age 32. Farmer schemes, the rural-only crop insurance scheme, a Gujarat men-only scheme, Ujjwala (marked below poverty line), and the ST scholarship do not fit."
+    "mustMatch": ["apy"],
+    "mustPossible": ["pmsby", "pmmvy", "ab-pmjay"],
+    "mustExclude": ["pm-kisan", "kcc", "post-st", "pmfby", "sasgj", "pmuy", "sui"],
+    "why": "Stand-Up India is closed (31-03-2025) and is excluded. PMSBY, Matru Vandana, and PM-JAY are checks, not matches. She is not sure about a ration card, so PM-JAY is not a confirmed match. Ujjwala's 2021 record stays closed. Farmer schemes and the ST scholarship do not fit."
   },
   {
     "id": "ka-senior-disability",
-    "summary": "A 67-year-old OBC man in rural Karnataka with a disability, unemployed, family income under ₹1 lakh.",
+    "summary": "A 67-year-old OBC man in rural Karnataka with a disability, unemployed, family income under ₹1 lakh, and he says he is on a below-poverty-line list.",
     "profile": {
       "state": "Karnataka",
       "age": 67,
@@ -61,11 +70,14 @@
       "occupation": "unemployed",
       "caste": "obc",
       "disability": true,
-      "residence": "Rural"
+      "residence": "Rural",
+      "groups": [],
+      "listing": "yes"
     },
-    "mustInclude": ["pmsby", "igndps"],
-    "mustExclude": ["pm-kisan", "sui", "post-st", "icar-pms-scstc", "pmmvy"],
-    "why": "PMSBY covers ages 18 to 70. Indira Gandhi National Disability Pension is a central disability scheme and is marked below poverty line, so the lowest income band is shown with a confirmation note. Farmer, self-employment, student, and maternity schemes do not fit. The disability pension text also requires more than 80% disability."
+    "mustMatch": ["mgnrega"],
+    "mustPossible": ["pmsby", "igndps", "nsy"],
+    "mustExclude": ["pm-kisan", "sui", "post-st", "icar-pms-scstc", "pmmvy", "apy", "sssps"],
+    "why": "MGNREGA fits a rural adult. The disability pension still requires the percentage stated on the page, so it is a check. Nekar Samman is a weaver scheme, so it is a check rather than a match. PMSBY needs a bank account and the age window ends at 70. APY stops at age 40. Stand-Up India is closed."
   },
   {
     "id": "tg-st-farmer",
@@ -78,10 +90,13 @@
       "occupation": "farmer",
       "caste": "st",
       "disability": false,
-      "residence": "Rural"
+      "residence": "Rural",
+      "groups": [],
+      "listing": "not-sure"
     },
-    "mustInclude": ["pm-kisan", "pmfby", "kcc", "sui", "rythu-bima"],
-    "mustExclude": ["post-st", "icar-pms-scstc", "igndpstn", "pmcup"],
-    "why": "Central farmer schemes plus Telangana Rythu Bima match. Stand-Up India matches a woman entrepreneur path and also an ST applicant. Student scholarships, Tamil Nadu disability pension, and the Uttar Pradesh pre-matric scholarship (ages 14–18) do not fit. Rythu Bima still requires a Telangana land record."
+    "mustMatch": ["apy", "mgnrega", "farmer-insurance"],
+    "mustPossible": ["pm-kisan", "pmfby", "kcc", "rythu-bima", "pmsby"],
+    "mustExclude": ["post-st", "icar-pms-scstc", "igndpstn", "pmcup", "sui", "aicte-ssss"],
+    "why": "The Telangana farmer insurance states a resident farmer aged 18 to 60, which this profile meets. PM-KISAN, Fasal Bima, Kisan Credit Card, and Rythu Bima still ask for land records, so they are checks. Stand-Up India is closed. Student scholarships and the Tamil Nadu disability pension do not fit."
   }
 ]

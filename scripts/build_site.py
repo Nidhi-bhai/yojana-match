@@ -18,6 +18,79 @@ DISCLAIMER = (
     "are copied from official portals and can change. Confirm every scheme on the official "
     "source before you apply."
 )
+AS_OF = "2026-10-27"
+BRAND = " | YojanaMatch"
+
+
+def clip(text, limit):
+    text = re.sub(r"\s+", " ", "" if text is None else str(text)).strip()
+    if len(text) <= limit:
+        return text
+    trimmed = text[: limit + 1]
+    if " " in trimmed:
+        trimmed = trimmed.rsplit(" ", 1)[0]
+    trimmed = trimmed.rstrip(" .,:;|-—")
+    if len(trimmed) < 20:
+        trimmed = text[:limit].rstrip()
+    return trimmed
+
+
+def brand_title(core):
+    core = re.sub(r"\s*\|\s*YojanaMatch$", "", re.sub(r"\s+", " ", core).strip())
+    if len(core) + len(BRAND) <= 60:
+        return core + BRAND
+    return clip(core, 60 - len(BRAND)) + BRAND
+
+
+def fit_title(title):
+    title = re.sub(r"\s+", " ", title).strip()
+    if title.startswith("YojanaMatch"):
+        return clip(title, 60)
+    return brand_title(title)
+
+
+def scheme_core(scheme):
+    short = (scheme.get("shortTitle") or "").strip()
+    name = scheme["name"]["en"].strip()
+
+    def marked(label):
+        if re.search(r"diploma", name, re.I) and not re.search(r"diploma", label, re.I):
+            return f"{label} Diploma"
+        if re.search(r"degree", name, re.I) and not re.search(r"degree", label, re.I):
+            return f"{label} Degree"
+        return label
+
+    labels = [marked(name)]
+    if short and marked(short) not in labels:
+        labels.append(marked(short))
+    tails = (
+        ": eligibility, documents, how to apply",
+        ": eligibility and documents",
+        ": eligibility",
+    )
+    for label in labels:
+        for tail in tails:
+            core = label + tail
+            if len(core) + len(BRAND) <= 60:
+                return core
+    fallback = marked(short or name)
+    return clip(fallback, 60 - len(BRAND) - len(": eligibility")) + ": eligibility"
+
+
+def scheme_description(scheme):
+    name = scheme["name"]["en"].strip()
+    benefit = (scheme.get("benefitAmount") or "").strip()
+    marker = ""
+    if re.search(r"diploma", name, re.I):
+        marker = " Diploma."
+    elif re.search(r"degree", name, re.I):
+        marker = " Degree."
+    benefit_bit = f" Benefit: {clip(benefit, 48)}." if benefit else ""
+    text = (
+        f"Who can apply for {name}.{marker}{benefit_bit} "
+        "Documents and the official apply link. Unofficial; verify on myScheme."
+    )
+    return clip(text, 155)
 
 
 def esc(value):
@@ -66,6 +139,7 @@ def chrome(depth):
       </nav>
     </header>
     <p class="disclaimer" data-i18n="disclaimer">{esc(DISCLAIMER)}</p>
+    <p class="disclaimer te-note" data-i18n="teBeta" hidden>Telugu scheme text is a machine translation (beta). Check the English.</p>
     """
 
 
@@ -77,15 +151,6 @@ def footer():
     """
 
 
-def ad_slot():
-    return """
-    <div class="ad-slot" data-ad-placeholder="true" role="complementary" aria-label="Advertisement">
-      <span class="ad-label" data-i18n="adLabel">Advertisement</span>
-      <!-- Google AdSense: paste the ad unit here when a publisher id exists. -->
-    </div>
-    """
-
-
 def page(title, description, canonical, depth, body, extra_head="", scripts=""):
     css, icon, head = chrome(depth)
     return f"""<!DOCTYPE html>
@@ -93,11 +158,11 @@ def page(title, description, canonical, depth, body, extra_head="", scripts=""):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{esc(title)}</title>
-  <meta name="description" content="{esc(description)}">
+  <title>{esc(fit_title(title))}</title>
+  <meta name="description" content="{esc(clip(description, 155))}">
   <link rel="canonical" href="{esc(canonical)}">
-  <meta property="og:title" content="{esc(title)}">
-  <meta property="og:description" content="{esc(description)}">
+  <meta property="og:title" content="{esc(fit_title(title))}">
+  <meta property="og:description" content="{esc(clip(description, 155))}">
   <meta property="og:url" content="{esc(canonical)}">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0e4d3c">
@@ -134,9 +199,19 @@ def option(value, label, selected=False):
 
 
 def index_page(payload, categories, states):
+    covered = {label for label, _slug in states}
+    names = list(payload["meta"]["states"])
+    for label, _slug in states:
+        if label not in names:
+            names.append(label)
     state_options = ['<option value="">Choose</option>']
-    for state in payload["meta"]["states"]:
-        state_options.append(option(state, state))
+    for state in names:
+        if state in covered:
+            state_options.append(option(state, state))
+        else:
+            state_options.append(
+                f'<option value="{esc(state)}" data-central-only="true">{esc(state)} (central schemes only)</option>'
+            )
     category_links = " ".join(
         f'<a href="category/{esc(slug)}/">{esc(label)}</a>' for label, slug in categories
     )
@@ -144,7 +219,7 @@ def index_page(payload, categories, states):
         f'<a href="state/{esc(slug)}/">{esc(label)}</a>' for label, slug in states
     )
     body = f"""
-    <p class="lede" data-i18n="tagline">Find every central and state scheme you qualify for.</p>
+    <p class="lede" data-i18n="tagline">See which of 239 central and state schemes may fit you.</p>
     <h1>Which government scheme am I eligible for?</h1>
     <p id="loading" data-i18n="loading">Loading the scheme database…</p>
     <form id="matcher-form" class="panel">
@@ -152,6 +227,7 @@ def index_page(payload, categories, states):
         <div>
           <label for="state" data-i18n="qState">Which state do you live in?</label>
           <select id="state" name="state" required>{''.join(state_options)}</select>
+          <span class="hint" data-i18n="stateHint">A state marked central schemes only has no state scheme in this list yet. Central schemes are still matched.</span>
         </div>
         <div>
           <label for="age" data-i18n="qAge">What is your age?</label>
@@ -217,11 +293,28 @@ def index_page(payload, categories, states):
             <label><input type="radio" name="residence" value="Urban"> <span data-i18n="Urban">Urban</span></label>
           </div>
         </fieldset>
+        <fieldset class="span-2">
+          <legend data-i18n="qGroups">Do any of these describe you? Leave this blank if none do.</legend>
+          <div class="choices stack">
+            <label><input type="checkbox" name="group" value="ex-serviceman"> <span data-i18n="gEx">Ex-serviceman, or widow of an ex-serviceman</span></label>
+            <label><input type="checkbox" name="group" value="freedom-fighter"> <span data-i18n="gFreedom">Freedom fighter, or an eligible dependent</span></label>
+            <label><input type="checkbox" name="group" value="orphan"> <span data-i18n="gOrphan">Orphan, lost a parent to Covid-19, or ward of a martyred armed-forces or paramilitary member</span></label>
+            <label><input type="checkbox" name="group" value="widow"> <span data-i18n="gWidow">Widow</span></label>
+            <label><input type="checkbox" name="group" value="police-ward"> <span data-i18n="gPolice">Ward or widow of police or Central Armed Police Forces personnel</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="span-2">
+          <legend data-i18n="qListing">Are you on a ration card (AAY or PHH), a family card, or an SECC / below-poverty-line list?</legend>
+          <div class="choices">
+            <label><input type="radio" name="listing" value="yes" required> <span data-i18n="listingYes">Yes</span></label>
+            <label><input type="radio" name="listing" value="no"> <span data-i18n="listingNo">No</span></label>
+            <label><input type="radio" name="listing" value="not-sure"> <span data-i18n="listingUnsure">Not sure</span></label>
+          </div>
+        </fieldset>
       </div>
       <p id="form-error" class="form-error" role="alert"></p>
       <button class="primary" type="submit" data-i18n="submit">Show my schemes</button>
     </form>
-    {ad_slot()}
     <div class="toolbar">
       <label class="hint" for="result-filter">Show
         <select id="result-filter">
@@ -238,13 +331,17 @@ def index_page(payload, categories, states):
     <section class="help-pack" id="help-pack">
       <h2 data-i18n="helpTitle">Application help pack</h2>
       <p class="price">$2</p>
-      <p data-i18n="helpBody">A $2 PDF checklist of the schemes in your results: documents to arrange, the official apply link, and the source to verify. It is a checklist, not a form-filling service, and it does not guarantee approval.</p>
+      <p data-i18n="helpBody">Optional $2 PDF of your confirmed matches: documents, apply link, and source. It is the same checklist already shown free on this page. It is in English. It is not a form-filling service and it does not guarantee approval.</p>
+      <p data-i18n="helpFree">The PDF is the same checklist as the free list on this page. Paying does not add schemes or file an application. You can use the on-page list without PayPal, including from India where PayPal may not take the payment.</p>
+      <p data-i18n="helpEnglish">The PDF is in English.</p>
+      <p data-i18n="helpRefund">For a refund, email nidhi69n@gmail.com with your PayPal order id.</p>
       <div id="paypal-button"></div>
-      <p id="paypal-note" data-i18n="helpNeedsMatch">Answer the questions first. The checklist is built from the schemes you match.</p>
+      <p id="paypal-note" data-i18n="helpNeedsMatch">Answer the questions first. The PDF lists only confirmed matches.</p>
+      <div id="saved-orders"></div>
     </section>
     <section class="browse">
       <h2 data-i18n="browseTitle">Browse schemes</h2>
-      <p data-i18n="browseIntro">Every page below is generated from the same verified database.</p>
+      <p data-i18n="browseIntro">These pages are copied from myScheme. This is a subset, not every scheme in India.</p>
       <h3 data-i18n="categories">Categories</h3>
       <div class="chip-row">{category_links}</div>
       <h3 data-i18n="states">States</h3>
@@ -259,8 +356,8 @@ def index_page(payload, categories, states):
     <script src="js/app.js"></script>
     """
     description = (
-        "Answer eight questions and see central and state government schemes you may qualify for. "
-        "Benefits, eligibility, documents, and official apply links, each with a source URL."
+        "Answer eight questions and see which of 239 copied schemes may fit. "
+        "Documents and official links. Unofficial; verify on myScheme."
     )
     return page(
         "YojanaMatch — which government scheme am I eligible for?",
@@ -275,8 +372,8 @@ def index_page(payload, categories, states):
 def scheme_page(scheme, related):
     name = scheme["name"]["en"]
     brief = scheme["brief"]["en"]
-    title = f"{name} eligibility, benefits, how to apply"
-    description = (brief or title)[:180]
+    title = scheme_core(scheme)
+    description = scheme_description(scheme)
     canonical = f"{SITE}/schemes/{scheme['slug']}/"
     benefit = scheme.get("benefitAmount") or "Benefit amount not stated on the official page"
     docs = "".join(f"<li>{esc(item)}</li>" for item in scheme["documents"].get("en") or [])
@@ -306,9 +403,20 @@ def scheme_page(scheme, related):
         alt += f'<span lang="hi">{esc(hi)}</span>'
     if te:
         alt += f' <span lang="te">{esc(te)}</span>'
+    closed = bool(scheme.get("closeDate") and scheme["closeDate"] < AS_OF)
     close = ""
     if scheme.get("closeDate"):
-        close = f'<p class="note">Official close date on myScheme: {esc(scheme["closeDate"])}. Confirm the scheme is still open.</p>'
+        close = (
+            f'<p class="note">myScheme close date: {esc(scheme["closeDate"])}. '
+            "This scheme is excluded from matches and from the PDF.</p>"
+            if closed
+            else f'<p class="note">myScheme close date: {esc(scheme["closeDate"])}.</p>'
+        )
+    if scheme.get("closeDateNote"):
+        close += f'<p class="note">{esc(scheme["closeDateNote"])}</p>'
+    full_name = ""
+    if name not in title:
+        full_name = f'<p class="meta">{esc(name)}</p>'
     copy = {
         "name": scheme["name"],
         "brief": scheme["brief"],
@@ -340,7 +448,9 @@ def scheme_page(scheme, related):
     body = f"""
     <article class="prose">
       <p class="meta">{esc(scheme.get("level") or "")} · {esc(states)}</p>
-      <h1 data-scheme="name">{esc(name)} eligibility, benefits, how to apply</h1>
+      {('<p class="badge closed">Closed</p>' if closed else '')}
+      <h1>{esc(title)}</h1>
+      {full_name}
       <p class="alt-names">{alt}</p>
           <p data-scheme-block="brief">{esc(brief)}</p>
       <div class="scheme-layout">
@@ -356,13 +466,12 @@ def scheme_page(scheme, related):
           <div id="apply-body" data-scheme-block="howToApply">{paragraphs(scheme["howToApply"]["en"]) or "<p>Steps were not listed on the official page.</p>"}</div>
           {apply_html}
           {close}
-          <p class="meta"><span data-i18n="verified">Last verified</span> {esc(scheme["lastVerified"])}</p>
+          <p class="meta"><span data-i18n="verified">Copied from myScheme on</span> {esc(scheme["lastVerified"])}</p>
           <p><a href="{esc(scheme["sourceUrl"])}" rel="noopener noreferrer" data-i18n="source">Official source</a></p>
           {"<h2 data-i18n='references'>References on myScheme</h2><ul>" + refs + "</ul>" if refs else ""}
           <p><a href="../../index.html#matcher-form">Check this scheme against your answers</a></p>
         </div>
         <aside class="side">
-          {ad_slot()}
           <div class="card">
             <p class="meta" data-i18n="ministry">Ministry</p>
             <p>{esc(scheme.get("ministry") or "—")}</p>
@@ -374,13 +483,6 @@ def scheme_page(scheme, related):
       </div>
     </article>
     """
-    # The h1 includes a fixed English suffix. Language toggle replaces only data-scheme
-    # fields, so keep the visible H1 as the English SEO title and show the translated
-    # name in the alt line via data-scheme on a dedicated element.
-    body = body.replace(
-        f'<h1 data-scheme="name">{esc(name)} eligibility, benefits, how to apply</h1>',
-        f"<h1>{esc(name)} eligibility, benefits, how to apply</h1>",
-    )
     scripts = f"""
     <script type="application/ld+json">{json_for_script(graph)}</script>
     <script type="application/json" id="scheme-copy">{json_for_script(copy)}</script>
@@ -391,7 +493,7 @@ def scheme_page(scheme, related):
     # paragraphs. Add data-scheme on a visually hidden fallback? The toggle should
     # update the prose. Point data-scheme at the containers by using textContent,
     # which would flatten paragraphs. That is acceptable for the toggle.
-    return page(title + " | YojanaMatch", description, canonical, 2, body, scripts=scripts)
+    return page(title, description, canonical, 2, body, scripts=scripts)
 
 
 def listing_page(title, description, canonical, depth, intro, items, crumb):
@@ -410,9 +512,10 @@ def about_page():
     <p>YojanaMatch is an independent website built by Nidhi Karuturi. It is not a Government of India website and it is not a state government website.</p>
     <p>The database is a structured subset of schemes published on <a href="https://www.myscheme.gov.in/">myScheme</a>, the official scheme portal maintained for the Government of India. Each record keeps the official name, eligibility text, benefits text, documents, an apply link when myScheme lists one, the source URL, and the date the record was checked.</p>
     <p>If the official page does not state a single benefit amount, that field is left blank. Amounts are not estimated.</p>
-    <p>The matcher uses myScheme’s own facet tags for state, gender, category, rural or urban residence, disability, occupation, employment, student-only schemes, and below-poverty-line schemes. Age coverage comes from the official age filter. An income ceiling is stored only when the eligibility text states one. A blank facet does not exclude anyone.</p>
-    <p>Where the official text says that a male applicant must be from the SC/ST category, that sentence is applied as written. It is stored next to the quote.</p>
-    <p>Eight questions cannot capture every condition, such as land in the applicant’s name. Read the eligibility on the scheme page and confirm it on the official portal before you apply. The catalogue is a verified subset, not every scheme in the country.</p>
+    <p>The catalogue has 239 schemes copied from myScheme on 2026-10-27. It is a subset, not every scheme in India. “Copied from myScheme on” is the copy date, not a claim that every link was checked by hand.</p>
+    <p>A scheme is a confirmed match only when the structured rules fit: state, age, gender, category, occupation, disability, income ceiling, student-only, and the optional questions for ex-servicemen, freedom fighters, orphans, widows, police wards, and ration card / SECC / below-poverty-line status. Scholarships are treated as student-only. A close date before 2026-10-27 removes the scheme from matches and from the PDF. Its page shows a closed badge.</p>
+    <p>Where the official text states a further condition this form does not ask, the scheme is listed under “Possibly eligible, check conditions”. That section is not a match and it is not put in the PDF.</p>
+    <p>The optional $2 PDF is the same English checklist already shown free on the page. Email nidhi69n@gmail.com with the PayPal order id for a refund or a second copy.</p>
     <p lang="hi">योजनामैच सरकारी वेबसाइट नहीं है। आवेदन से पहले आधिकारिक स्रोत पर जाँच करें।</p>
     <p lang="te">యోజనామ్యాచ్ ప్రభుత్వ వెబ్‌సైట్ కాదు. దరఖాస్తుకు ముందు అధికారిక మూలంలో ధృవీకరించండి.</p>
     """
@@ -438,6 +541,22 @@ def main():
     schemes = payload["schemes"]
     if len(schemes) < 150:
         raise SystemExit(f"Need at least 150 schemes, found {len(schemes)}")
+    i18n_path = os.path.join(DOCS, "js", "i18n.js")
+    with open(i18n_path, encoding="utf-8") as handle:
+        i18n_source = handle.read()
+    if f"See which of {len(schemes)} central and state schemes may fit you." not in i18n_source:
+        raise SystemExit("English tagline does not state the scheme count")
+    descriptions = [scheme_description(scheme) for scheme in schemes]
+    seen = {}
+    for scheme, description in zip(schemes, descriptions):
+        if len(description) > 155:
+            raise SystemExit(f"Description too long for {scheme['slug']}")
+        if len(fit_title(scheme_core(scheme))) > 60:
+            raise SystemExit(f"Title too long for {scheme['slug']}")
+        previous = seen.get(description)
+        if previous:
+            raise SystemExit(f"Duplicate description for {scheme['slug']} and {previous}")
+        seen[description] = scheme["slug"]
     for folder in ("schemes", "category", "state", "about"):
         path = os.path.join(DOCS, folder)
         if os.path.isdir(path):
@@ -479,7 +598,7 @@ def main():
     directory_items = []
     for scheme in schemes:
         brief = (scheme["brief"]["en"] or "")[:220]
-        meta = f"{scheme.get('level') or ''} · {scheme['lastVerified']}"
+        meta = f"{scheme.get('level') or ''} · Copied from myScheme on {scheme['lastVerified']}"
         directory_items.append((f"{scheme['slug']}/", scheme["name"]["en"], brief, meta))
         related = []
         for other in schemes:
@@ -523,7 +642,7 @@ def main():
                 f"{label} government schemes: eligibility, benefits, and how to apply.",
                 f"{SITE}/category/{slug}/",
                 2,
-                f"Schemes filed under {label} on myScheme and included in this verified subset.",
+                f"Schemes filed under {label} on myScheme and copied into this subset.",
                 items,
                 "../../index.html",
             ),
