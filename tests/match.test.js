@@ -1,6 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("fs");
 const path = require("path");
+const vm = require("node:vm");
 const { explain, matchAll, possibleAll } = require("../docs/js/match.js");
 const { buildChecklistPdf } = require("../docs/js/pdf.js");
 
@@ -196,8 +198,51 @@ test("special groups stay hidden until the person opts in", () => {
   assert.equal(explain(row, Object.assign({}, farmer, { groups: ["freedom-fighter"] })).status, "match");
 });
 
+test("docs/config.js sets PAYPAL_CLIENT_ID", () => {
+  const code = fs.readFileSync(path.join(__dirname, "..", "docs", "config.js"), "utf8");
+  const sandbox = { window: {} };
+  vm.runInNewContext(code, sandbox, { filename: "docs/config.js" });
+  const config = sandbox.window.YOJANA_CONFIG;
+  assert.equal(typeof config.PAYPAL_CLIENT_ID, "string");
+  assert.ok(config.PAYPAL_CLIENT_ID.length > 20);
+  assert.equal(config.PAYPAL_CLIENT_ID.includes("YOUR_"), false);
+  assert.equal(/\s/.test(config.PAYPAL_CLIENT_ID), false);
+});
+
+test("a living farmer is not confirmed for a deceased-farmer grant", () => {
+  const payload = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "schemes.json"), "utf8"));
+  const by = Object.fromEntries(payload.schemes.map((row) => [row.slug, row]));
+  const farmer = {
+    state: "Andhra Pradesh", age: 40, gender: "Male", incomeBand: "under-1l",
+    occupation: "farmer", caste: "general", disability: false, residence: "Rural",
+    groups: [], listing: "yes",
+  };
+  for (const slug of ["fseg", "kpsap"]) {
+    assert.equal(explain(by[slug], farmer).status, "possible", slug);
+  }
+  const woman = Object.assign({}, farmer, { state: "Rajasthan", gender: "Female", groups: [] });
+  assert.equal(explain(by.cmenspy, woman).status, "possible");
+  const gujarat = Object.assign({}, farmer, { state: "Gujarat", gender: "Female" });
+  assert.equal(explain(by.mmyg, gujarat).status, "possible");
+  const home = Object.assign({}, farmer, { state: "Madhya Pradesh", age: 65 });
+  assert.equal(explain(by.sssvamnapy, home).status, "possible");
+  const saver = Object.assign({}, farmer, { state: "Uttar Pradesh", age: 30, incomeBand: "above-8l" });
+  assert.equal(explain(by.apy, saver).status, "possible");
+  const low = Object.assign({}, saver, { incomeBand: "under-1l" });
+  assert.equal(explain(by.apy, low).status, "possible");
+  const widow = {
+    state: "Madhya Pradesh", age: 25, gender: "Female", incomeBand: "under-1l",
+    occupation: "other", caste: "general", disability: false, residence: "Rural",
+    groups: ["widow"], listing: "yes",
+  };
+  assert.equal(explain(by.ignwpsmp, widow).status, "no");
+  assert.equal(explain(by.ignwpsmp, Object.assign({}, widow, { age: 50 })).status, "match");
+  const upWidow = Object.assign({}, widow, { state: "Uttar Pradesh", age: 10 });
+  assert.equal(explain(by.wpup, upWidow).status, "no");
+  assert.equal(explain(by.wpup, Object.assign({}, upWidow, { age: 30 })).status, "match");
+});
+
 test("database profiles are consistent when the catalog is present", () => {
-  const fs = require("fs");
   const file = path.join(__dirname, "..", "data", "schemes.json");
   if (!fs.existsSync(file)) {
     return;
@@ -266,7 +311,8 @@ test("database profiles are consistent when the catalog is present", () => {
   const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   const top = ranked[0] ? ranked[0][1] / profilesSeen : 0;
   assert.ok(top < 0.8, `a scheme matched ${(top * 100).toFixed(1)}% of profiles`);
-  for (const slug of ["ab-pmjay", "inspire-she", "aicte-ssss", "sssps", "sui", "pmjdy", "pm-gkay", "pmbjp"]) {
+  assert.deepEqual(ranked.map((row) => row[0]).sort(), ["farmer-insurance", "mgnrega"]);
+  for (const slug of ["ab-pmjay", "inspire-she", "aicte-ssss", "sssps", "sui", "pmjdy", "pm-gkay", "pmbjp", "apy", "pmksypdmc", "fseg"]) {
     assert.equal(counts[slug] || 0, 0, slug);
   }
 });

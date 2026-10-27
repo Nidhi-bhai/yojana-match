@@ -131,6 +131,77 @@ class SchemeTextTests(unittest.TestCase):
         self.assertNotIn("nrega.nic.in", scheme["howToApply"]["en"])
         self.assertIn("myscheme.gov.in/schemes/cmkvy", scheme["howToApply"]["en"])
 
+    def test_a_death_benefit_sentence_is_not_treated_as_settled(self):
+        scheme = annotate_scheme({
+            "slug": "fseg",
+            "name": {"en": "Farmer Suicide Ex-Gratia"},
+            "brief": {"en": ""},
+            "eligibility": {
+                "en": "1. The deceased farmer should have been a resident of Andhra Pradesh.\n"
+                "1. The beneficiary should be a family member of the deceased farmer."
+            },
+            "criteria": {"occupations": ["Farmer"]},
+        })
+        codes = [item["code"] for item in scheme["criteria"]["uncertain"]]
+        self.assertIn("unmapped", codes)
+
+    def test_apy_income_tax_line_from_the_brief_stays_open(self):
+        scheme = annotate_scheme({
+            "slug": "apy",
+            "name": {"en": "Atal Pension Yojana"},
+            "brief": {"en": "A savings account holder aged 18-40 years, who is not an income tax-payee."},
+            "eligibility": {"en": "1. The minimum age of joining APY is 18 years and maximum is 40 years."},
+            "criteria": {"ageMin": 18, "ageMax": 40},
+        })
+        quotes = " ".join(item["quote"] for item in scheme["criteria"]["uncertain"])
+        self.assertIn("income tax", quotes)
+
+    def test_blank_age_facet_takes_the_stated_window(self):
+        scheme = annotate_scheme({
+            "slug": "ignwpsmp",
+            "name": {"en": "Indira Gandhi National Widow Pension Scheme-Madhya Pradesh"},
+            "brief": {"en": ""},
+            "eligibility": {
+                "en": "1. The applicant should be a domicile of the state of Madhya Pradesh.\n"
+                "1. The applicant should be from a Below Poverty Line (BPL) family.\n"
+                "1. The application should be aged between 40 to 79 years."
+            },
+            "criteria": {"ageMin": None, "ageMax": None, "genders": ["Female"], "bplOnly": True},
+        })
+        self.assertEqual(scheme["criteria"]["ageMin"], 40)
+        self.assertEqual(scheme["criteria"]["ageMax"], 79)
+        self.assertEqual(scheme["criteria"]["uncertain"], [])
+
+    def test_minimum_age_sentence_fills_a_blank_minimum(self):
+        scheme = annotate_scheme({
+            "slug": "wpup",
+            "name": {"en": "Widow Pension - Uttar Pradesh"},
+            "brief": {"en": ""},
+            "eligibility": {
+                "en": "1. The applicant should be a permanent resident of Uttar Pradesh state.\n"
+                "1. The applicant's husband has died.\n"
+                "1. The age of the applicant should not be less than 18 years.\n"
+                "1. The annual income of the applicant and her family from all sources should not exceed ₹ 2,00,000/-"
+            },
+            "criteria": {"ageMin": None, "ageMax": None, "genders": ["Female"]},
+        })
+        self.assertEqual(scheme["criteria"]["ageMin"], 18)
+        self.assertIsNone(scheme["criteria"]["ageMax"])
+        self.assertEqual(scheme["criteria"]["uncertain"], [])
+
+    def test_age_and_rural_sentences_are_settled_by_the_form(self):
+        scheme = annotate_scheme({
+            "slug": "mgnrega",
+            "name": {"en": "Mahatma Gandhi National Rural Employment Guarantee Act"},
+            "brief": {"en": ""},
+            "eligibility": {
+                "en": "1. The applicant must be at least 18 years of age.\n"
+                "1. The applicant must be residing in a Rural Area."
+            },
+            "criteria": {},
+        })
+        self.assertEqual(scheme["criteria"]["uncertain"], [])
+
     def test_age_window_and_open_ends(self):
         tested = [0, 18, 40, 60, 100]
         self.assertEqual(age_bounds([18, 40, 60], tested), (18, 60))

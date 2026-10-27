@@ -14,10 +14,10 @@
       "groups": [],
       "listing": "not-sure"
     },
-    "mustMatch": ["apy", "mgnrega", "pmksypdmc"],
-    "mustPossible": ["pm-kisan", "pmfby", "kcc", "pmsby"],
+    "mustMatch": ["mgnrega"],
+    "mustPossible": ["apy", "pmksypdmc", "pm-kisan", "pmfby", "kcc", "pmsby"],
     "mustExclude": ["post-st", "pmmvy", "sui", "icar-pms-scstc", "igndpstn", "dpyup", "lpsup", "aicte-ssss", "inspire-she", "sssps"],
-    "why": "Atal Pension Yojana fits ages 18 to 40. MGNREGA fits a rural adult. Per Drop More Crop fits a rural farmer. PM-KISAN, Fasal Bima, and Kisan Credit Card stay in the check section because the official text requires land or cultivator status. PMSBY needs a bank account. Scholarships, the freedom-fighter pension, Stand-Up India (closed 2025-03-31), maternity, and other states' pensions are excluded."
+    "why": "MGNREGA fits a rural adult, and its official text states only age and a rural address. Atal Pension Yojana stays a check because the text requires a savings account and excludes income-tax payers. Per Drop More Crop stays a check because of the hectare ceiling and Aadhaar. PM-KISAN, Fasal Bima, and Kisan Credit Card stay in the check section because the official text requires land or cultivator status. PMSBY needs a bank account. Scholarships, the freedom-fighter pension, Stand-Up India (closed 2025-03-31), maternity, and other states' pensions are excluded."
   },
   {
     "id": "bihar-sc-student",
@@ -34,10 +34,10 @@
       "groups": [],
       "listing": "not-sure"
     },
-    "mustMatch": ["apy"],
-    "mustPossible": ["icar-pms-scstc", "inspire-she"],
+    "mustMatch": [],
+    "mustPossible": ["apy", "icar-pms-scstc", "inspire-she"],
     "mustExclude": ["pm-kisan", "kcc", "pmmvy", "sui", "post-st", "ssscsitipcsvs", "nsy", "aicte-ssss"],
-    "why": "The ICAR scholarship and INSPIRE are shown to check, because admission or rank is still unconfirmed, and they are not confirmed matches. Farmer schemes, Matru Vandana, the closed Stand-Up India scheme, the ST-only scholarship, a Gujarat SC scholarship, Swanath (she did not opt in as an orphan), and Karnataka's weaver scheme do not fit."
+    "why": "Atal Pension Yojana, the ICAR scholarship, and INSPIRE are checks. Farmer schemes, Matru Vandana, the closed Stand-Up India scheme, the ST-only scholarship, a Gujarat SC scholarship, Swanath (she did not opt in as an orphan), and Karnataka's weaver scheme do not fit."
   },
   {
     "id": "mh-woman-entrepreneur",
@@ -54,10 +54,10 @@
       "groups": [],
       "listing": "not-sure"
     },
-    "mustMatch": ["apy"],
-    "mustPossible": ["pmsby", "pmmvy", "ab-pmjay"],
+    "mustMatch": [],
+    "mustPossible": ["apy", "pmsby", "pmmvy", "ab-pmjay"],
     "mustExclude": ["pm-kisan", "kcc", "post-st", "pmfby", "sasgj", "pmuy", "sui"],
-    "why": "Stand-Up India is closed (31-03-2025) and is excluded. PMSBY, Matru Vandana, and PM-JAY are checks, not matches. She is not sure about a ration card, so PM-JAY is not a confirmed match. Ujjwala's 2021 record stays closed. Farmer schemes and the ST scholarship do not fit."
+    "why": "Stand-Up India is closed (31-03-2025) and is excluded. Atal Pension Yojana, PMSBY, Matru Vandana, and PM-JAY are checks. She is not sure about a ration card, so PM-JAY is not a confirmed match. Ujjwala's 2021 record stays closed. Farmer schemes and the ST scholarship do not fit."
   },
   {
     "id": "ka-senior-disability",
@@ -94,8 +94,8 @@
       "groups": [],
       "listing": "not-sure"
     },
-    "mustMatch": ["apy", "mgnrega", "farmer-insurance"],
-    "mustPossible": ["pm-kisan", "pmfby", "kcc", "rythu-bima", "pmsby"],
+    "mustMatch": ["mgnrega", "farmer-insurance"],
+    "mustPossible": ["apy", "pm-kisan", "pmfby", "kcc", "rythu-bima", "pmsby"],
     "mustExclude": ["post-st", "icar-pms-scstc", "igndpstn", "pmcup", "sui", "aicte-ssss"],
     "why": "The Telangana farmer insurance states a resident farmer aged 18 to 60, which this profile meets. PM-KISAN, Fasal Bima, Kisan Credit Card, and Rythu Bima still ask for land records, so they are checks. Stand-Up India is closed. Student scholarships and the Tamil Nadu disability pension do not fit."
   }
