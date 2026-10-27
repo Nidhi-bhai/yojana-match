@@ -1,0 +1,235 @@
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-latin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-latin-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-devanagari-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-devanagari-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-telugu-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0C00-0C7F, U+200C-200D, U+20B9, U+25CC;
+}
+@font-face {
+  font-family: "Yojana Sans";
+  src: url("../fonts/noto-sans-telugu-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0C00-0C7F, U+200C-200D, U+20B9, U+25CC;
+}
+
+:root {
+  --ink: #1c1915;
+  --muted: #5c564c;
+  --paper: #f3efe4;
+  --card: #fffdf8;
+  --line: #e3d9c6;
+  --forest: #0e4d3c;
+  --forest-dark: #08382b;
+  --clay: #b54a16;
+  --clay-soft: #f8e6d8;
+  --good: #e7f3ec;
+  --warn: #fff4d8;
+  --shadow: 0 12px 30px rgba(48, 32, 12, 0.06);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 400px at 90% -10%, #f7e2cc 0%, transparent 55%),
+    var(--paper);
+  font-family: "Yojana Sans", "Segoe UI", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+a { color: var(--forest); }
+a:hover { color: var(--clay); }
+:focus-visible { outline: 3px solid var(--clay); outline-offset: 2px; }
+img { max-width: 100%; }
+
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  background: var(--ink);
+  color: white;
+  padding: 0.5rem 0.8rem;
+  z-index: 5;
+}
+.skip:focus { top: 0.75rem; }
+
+.site-header, .disclaimer, main, .site-footer { width: min(1120px, calc(100% - 1.5rem)); margin-inline: auto; }
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0 0.6rem;
+}
+.brand {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: Georgia, "Iowan Old Style", Palatino, "Yojana Sans", serif;
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+}
+.brand span { color: var(--clay); }
+.header-nav { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; justify-content: flex-end; }
+.header-nav a { text-decoration: none; font-weight: 700; }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.lang button {
+  border: 0;
+  background: transparent;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--forest); color: white; }
+
+.disclaimer {
+  background: var(--warn);
+  border: 1px solid #ead7a2;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  color: #3f3110;
+  margin-bottom: 1rem;
+}
+main { padding-bottom: 3rem; }
+h1, h2, h3 { font-family: Georgia, "Iowan Old Style", Palatino, "Yojana Sans", serif; line-height: 1.2; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); margin: 0.2rem 0 0.4rem; }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 40rem; }
+
+.panel, .card, .help-pack, .browse, .ad-slot {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+.panel { padding: 1rem; margin: 1rem 0 1.25rem; }
+.questions { display: grid; gap: 0.85rem; }
+@media (min-width: 800px) {
+  .questions { grid-template-columns: 1fr 1fr; }
+  .span-2 { grid-column: span 2; }
+}
+label, legend { display: block; font-weight: 700; margin-bottom: 0.3rem; }
+fieldset { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+.hint { display: block; font-weight: 400; color: var(--muted); }
+input, select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid #d4c8b2;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  padding: 0.4rem 0.7rem;
+}
+.choices { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.choices label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  background: #faf7f1;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  min-height: 44px;
+  margin: 0;
+}
+.choices input { width: auto; min-height: 0; }
+.form-error { color: #8d1d1d; min-height: 1.2em; }
+button.primary, a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 0;
+  background: var(--forest);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+button.primary:hover, a.button:hover { background: var(--forest-dark); color: white; }
+a.button.secondary, button.secondary { background: transparent; color: var(--forest); border: 1.5px solid var(--forest); }
+
+.ad-slot {
+  min-height: 90px;
+  margin: 1rem 0;
+  padding: 0.8rem;
+  display: grid;
+  place-items: center;
+  box-shadow: none;
+  background: repeating-linear-gradient(-45deg, #faf7f1, #faf7f1 8px, #f3efe6 8px, #f3efe6 16px);
+}
+.ad-label { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+.results-head { display: flex; justify-content: space-between; gap: 1rem; align-items: end; flex-wrap: wrap; }
+.toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.toolbar input { min-width: min(100%, 220px); }
+.card-list { display: grid; gap: 0.8rem; }
+.card { padding: 1rem 1rem 1rem 1.05rem; border-left: 6px solid var(--forest); }
+.card header { display: flex; justify-content: space-between; gap: 0.6rem; align-items: start; }
+.card h3 { margin: 0.25rem 0; font-size: 1.35rem; }
+.card h3 a { color: inherit; text-decoration: none; }
+.badges { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.badge { background: var(--good); color: var(--forest-dark); border-radius: 999px; padding: 0.1rem 0.55rem; font-size: 0.82rem; font-weight: 700; }
+.badge.clay { background: var(--clay-soft); color: #7a3010; }
+.benefit { font-weight: 700; }
+.note { background: var(--warn); border-radius: 10px; padding: 0.45rem 0.6rem; }
+.meta { color: var(--muted); font-size: 0.92rem; }
+.actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.7rem; }
+.doc-list { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+.group-title { margin: 1.2rem 0 0.4rem; }
+
+.help-pack { padding: 1rem 1.1rem; margin-top: 1rem; }
+.price { font-family: Georgia, "Yojana Sans", serif; font-size: 2rem; margin: 0.2rem 0; }
+.browse { padding: 1rem; margin-top: 1rem; box-shadow: none; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.chip-row a { background: #faf7f1; border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.7rem; text-decoration: none; }
+
+.prose h1 { margin-top: 0.4rem; }
+.alt-names { color: var(--muted); }
+.scheme-layout { display: grid; gap: 1rem; }
+@media (min-width: 900px) {
+  .scheme-layout { grid-template-columns: 1.4fr 0.8fr; align-items: start; }
+}
+.side { display: grid; gap: 0.8rem; }
+.side .card, .side .ad-slot { box-shadow: none; }
+
+.site-footer { padding: 1rem 0 2rem; color: var(--muted); }
+.site-footer a { font-weight: 700; }
+.empty { padding: 1rem; background: white; border-radius: 14px; border: 1px dashed var(--line); }

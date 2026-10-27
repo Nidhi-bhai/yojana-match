@@ -1,0 +1,87 @@
+[
+  {
+    "id": "up-farmer",
+    "summary": "A 40-year-old general-category male farmer in rural Uttar Pradesh, family income under ₹1 lakh, no disability.",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 40,
+      "gender": "Male",
+      "incomeBand": "under-1l",
+      "occupation": "farmer",
+      "caste": "general",
+      "disability": false,
+      "residence": "Rural"
+    },
+    "mustInclude": ["pm-kisan", "pmfby", "kcc", "pmsby"],
+    "mustExclude": ["post-st", "pmmvy", "sui", "icar-pms-scstc", "igndpstn", "dpyup", "lpsup"],
+    "why": "PM-KISAN, PM Fasal Bima, and Kisan Credit Card are central farmer schemes. PMSBY is open at age 40. The ST post-matric scholarship, Matru Vandana (women), Stand-Up India (he is not SC/ST), the ICAR SC/ST scholarship, Tamil Nadu disability pension, UP divyang pension, and the UP leprosy pension do not fit."
+  },
+  {
+    "id": "bihar-sc-student",
+    "summary": "An 18-year-old Scheduled Caste woman student in urban Bihar, family income under ₹1 lakh, no disability.",
+    "profile": {
+      "state": "Bihar",
+      "age": 18,
+      "gender": "Female",
+      "incomeBand": "under-1l",
+      "occupation": "student",
+      "caste": "sc",
+      "disability": false,
+      "residence": "Urban"
+    },
+    "mustInclude": ["icar-pms-scstc"],
+    "mustExclude": ["pm-kisan", "kcc", "pmmvy", "sui", "post-st", "ssscsitipcsvs", "nsy"],
+    "why": "The ICAR post-matric scholarship is for SC/ST students aged 18 to 35. Farmer schemes, Matru Vandana (official age filter starts at 21), Stand-Up India (self-employment), the ST-only post-matric scholarship, a Gujarat SC scholarship, and a Karnataka weaver scheme do not fit. The ICAR page still requires admission in an agricultural university."
+  },
+  {
+    "id": "mh-woman-entrepreneur",
+    "summary": "A 32-year-old general-category woman entrepreneur in urban Maharashtra, family income ₹2.5–5 lakh, no disability.",
+    "profile": {
+      "state": "Maharashtra",
+      "age": 32,
+      "gender": "Female",
+      "incomeBand": "2.5-5l",
+      "occupation": "woman_entrepreneur",
+      "caste": "general",
+      "disability": false,
+      "residence": "Urban"
+    },
+    "mustInclude": ["sui", "pmsby"],
+    "mustExclude": ["pm-kisan", "kcc", "post-st", "pmfby", "sasgj", "pmuy"],
+    "why": "Stand-Up India matches because the official text says a male applicant must be SC/ST, so a woman is not limited to those categories, and the employment facet is self-employed. PMSBY covers age 32. Farmer schemes, the rural-only crop insurance scheme, a Gujarat men-only scheme, Ujjwala (marked below poverty line), and the ST scholarship do not fit."
+  },
+  {
+    "id": "ka-senior-disability",
+    "summary": "A 67-year-old OBC man in rural Karnataka with a disability, unemployed, family income under ₹1 lakh.",
+    "profile": {
+      "state": "Karnataka",
+      "age": 67,
+      "gender": "Male",
+      "incomeBand": "under-1l",
+      "occupation": "unemployed",
+      "caste": "obc",
+      "disability": true,
+      "residence": "Rural"
+    },
+    "mustInclude": ["pmsby", "igndps"],
+    "mustExclude": ["pm-kisan", "sui", "post-st", "icar-pms-scstc", "pmmvy"],
+    "why": "PMSBY covers ages 18 to 70. Indira Gandhi National Disability Pension is a central disability scheme and is marked below poverty line, so the lowest income band is shown with a confirmation note. Farmer, self-employment, student, and maternity schemes do not fit. The disability pension text also requires more than 80% disability."
+  },
+  {
+    "id": "tg-st-farmer",
+    "summary": "A 29-year-old Scheduled Tribe woman farmer in rural Telangana, family income ₹1–2.5 lakh, no disability.",
+    "profile": {
+      "state": "Telangana",
+      "age": 29,
+      "gender": "Female",
+      "incomeBand": "1-2.5l",
+      "occupation": "farmer",
+      "caste": "st",
+      "disability": false,
+      "residence": "Rural"
+    },
+    "mustInclude": ["pm-kisan", "pmfby", "kcc", "sui", "rythu-bima"],
+    "mustExclude": ["post-st", "icar-pms-scstc", "igndpstn", "pmcup"],
+    "why": "Central farmer schemes plus Telangana Rythu Bima match. Stand-Up India matches a woman entrepreneur path and also an ST applicant. Student scholarships, Tamil Nadu disability pension, and the Uttar Pradesh pre-matric scholarship (ages 14–18) do not fit. Rythu Bima still requires a Telangana land record."
+  }
+]
