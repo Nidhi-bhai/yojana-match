@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YojanaMatch — which government scheme am I eligible for?</title>
+  <meta name="description" content="Answer eight questions and see central and state government schemes you may qualify for. Benefits, eligibility, documents, and official apply links, each with a source URL.">
+  <link rel="canonical" href="https://nidhi-bhai.github.io/yojana-match/">
+  <meta property="og:title" content="YojanaMatch — which government scheme am I eligible for?">
+  <meta property="og:description" content="Answer eight questions and see central and state government schemes you may qualify for. Benefits, eligibility, documents, and official apply links, each with a source URL.">
+  <meta property="og:url" content="https://nidhi-bhai.github.io/yojana-match/">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0e4d3c">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  
+</head>
+<body>
+  
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="index.html">Yojana<span>Match</span></a>
+      <nav class="header-nav" aria-label="Primary">
+        <a href="schemes/index.html" data-i18n="allSchemes">All schemes</a>
+        <a href="about/index.html" data-i18n="about">How this works</a>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="hi" lang="hi">हिं</button>
+          <button type="button" data-lang="te" lang="te">తె</button>
+        </div>
+      </nav>
+    </header>
+    <p class="disclaimer" data-i18n="disclaimer">YojanaMatch is not a government website. Names, benefits, eligibility, and links are copied from official portals and can change. Confirm every scheme on the official source before you apply.</p>
+    
+  <main id="content">
+    
+    <p class="lede" data-i18n="tagline">Find every central and state scheme you qualify for.</p>
+    <h1>Which government scheme am I eligible for?</h1>
+    <p id="loading" data-i18n="loading">Loading the scheme database…</p>
+    <form id="matcher-form" class="panel">
+      <div class="questions">
+        <div>
+          <label for="state" data-i18n="qState">Which state do you live in?</label>
+          <select id="state" name="state" required><option value="">Choose</option><option value="Gujarat">Gujarat</option><option value="Uttarakhand">Uttarakhand</option><option value="Madhya Pradesh">Madhya Pradesh</option><option value="Goa">Goa</option><option value="Puducherry">Puducherry</option><option value="Haryana">Haryana</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Rajasthan">Rajasthan</option><option value="Bihar">Bihar</option><option value="West Bengal">West Bengal</option><option value="Chhattisgarh">Chhattisgarh</option><option value="Jharkhand">Jharkhand</option><option value="Meghalaya">Meghalaya</option><option value="Assam">Assam</option><option value="Kerala">Kerala</option><option value="Maharashtra">Maharashtra</option><option value="Odisha">Odisha</option><option value="Himachal Pradesh">Himachal Pradesh</option><option value="Dadra &amp; Nagar Haveli and Daman &amp; Diu">Dadra &amp; Nagar Haveli and Daman &amp; Diu</option><option value="Karnataka">Karnataka</option><option value="Delhi">Delhi</option><option value="Andhra Pradesh">Andhra Pradesh</option><option value="Jammu and Kashmir">Jammu and Kashmir</option><option value="Uttar Pradesh">Uttar Pradesh</option><option value="Arunachal Pradesh">Arunachal Pradesh</option><option value="Tripura">Tripura</option><option value="Punjab">Punjab</option><option value="Manipur">Manipur</option><option value="Mizoram">Mizoram</option><option value="Sikkim">Sikkim</option><option value="Telangana">Telangana</option><option value="Nagaland">Nagaland</option><option value="Chandigarh">Chandigarh</option><option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option><option value="Lakshadweep">Lakshadweep</option></select>
+        </div>
+        <div>
+          <label for="age" data-i18n="qAge">What is your age?</label>
+          <span class="hint" data-i18n="ageHint">Completed years</span>
+          <input id="age" name="age" type="number" inputmode="numeric" min="0" max="120" required>
+        </div>
+        <div>
+          <label for="gender" data-i18n="qGender">Gender</label>
+          <select id="gender" name="gender" required>
+            <option value="">Choose</option>
+            <option value="Female" data-i18n="optFemale">Female</option>
+            <option value="Male" data-i18n="optMale">Male</option>
+            <option value="Transgender" data-i18n="optTrans">Transgender</option>
+          </select>
+        </div>
+        <div>
+          <label for="income" data-i18n="qIncome">Annual family income</label>
+          <select id="income" name="income" required>
+            <option value="">Choose</option>
+            <option value="under-1l" data-i18n="under-1l">Under ₹1,00,000</option>
+            <option value="1-2.5l" data-i18n="1-2.5l">₹1,00,000 – ₹2,50,000</option>
+            <option value="2.5-5l" data-i18n="2.5-5l">₹2,50,000 – ₹5,00,000</option>
+            <option value="5-8l" data-i18n="5-8l">₹5,00,000 – ₹8,00,000</option>
+            <option value="above-8l" data-i18n="above-8l">Above ₹8,00,000</option>
+          </select>
+        </div>
+        <div>
+          <label for="occupation" data-i18n="qOccupation">Occupation</label>
+          <select id="occupation" name="occupation" required>
+            <option value="">Choose</option>
+            <option value="farmer" data-i18n="farmer">Farmer</option>
+            <option value="student" data-i18n="student">Student</option>
+            <option value="msme" data-i18n="msme">MSME / self-employed</option>
+            <option value="woman_entrepreneur" data-i18n="woman_entrepreneur">Woman entrepreneur</option>
+            <option value="salaried" data-i18n="salaried">Salaried</option>
+            <option value="unemployed" data-i18n="unemployed">Unemployed</option>
+            <option value="other" data-i18n="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="caste" data-i18n="qCaste">Category</label>
+          <select id="caste" name="caste" required>
+            <option value="">Choose</option>
+            <option value="general" data-i18n="general">General</option>
+            <option value="obc" data-i18n="obc">Other Backward Class (OBC)</option>
+            <option value="sc" data-i18n="sc">Scheduled Caste (SC)</option>
+            <option value="st" data-i18n="st">Scheduled Tribe (ST)</option>
+            <option value="pvtg" data-i18n="pvtg">Particularly Vulnerable Tribal Group (PVTG)</option>
+            <option value="dnt" data-i18n="dnt">De-notified, nomadic, and semi-nomadic (DNT)</option>
+          </select>
+        </div>
+        <fieldset>
+          <legend data-i18n="qDisability">Do you have a disability?</legend>
+          <div class="choices">
+            <label><input type="radio" name="disability" value="yes" required> <span data-i18n="disabilityYes">Yes</span></label>
+            <label><input type="radio" name="disability" value="no"> <span data-i18n="disabilityNo">No</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend data-i18n="qResidence">Where do you live?</legend>
+          <div class="choices">
+            <label><input type="radio" name="residence" value="Rural" required> <span data-i18n="Rural">Rural</span></label>
+            <label><input type="radio" name="residence" value="Urban"> <span data-i18n="Urban">Urban</span></label>
+          </div>
+        </fieldset>
+      </div>
+      <p id="form-error" class="form-error" role="alert"></p>
+      <button class="primary" type="submit" data-i18n="submit">Show my schemes</button>
+    </form>
+    
+    <div class="ad-slot" data-ad-placeholder="true" role="complementary" aria-label="Advertisement">
+      <span class="ad-label" data-i18n="adLabel">Advertisement</span>
+      <!-- Google AdSense: paste the ad unit here when a publisher id exists. -->
+    </div>
+    
+    <div class="toolbar">
+      <label class="hint" for="result-filter">Show
+        <select id="result-filter">
+          <option value="all" data-i18n="filterAll">All matches</option>
+          <option value="state" data-i18n="groupState">Schemes for your state</option>
+          <option value="central" data-i18n="groupCentral">Central schemes</option>
+        </select>
+      </label>
+      <label class="hint" for="result-search"><span data-i18n="searchResults">Search within matches</span>
+        <input id="result-search" type="search">
+      </label>
+    </div>
+    <section id="results" aria-live="polite"></section>
+    <section class="help-pack" id="help-pack">
+      <h2 data-i18n="helpTitle">Application help pack</h2>
+      <p class="price">$2</p>
+      <p data-i18n="helpBody">A $2 PDF checklist of the schemes in your results: documents to arrange, the official apply link, and the source to verify. It is a checklist, not a form-filling service, and it does not guarantee approval.</p>
+      <div id="paypal-button"></div>
+      <p id="paypal-note" data-i18n="helpNeedsMatch">Answer the questions first. The checklist is built from the schemes you match.</p>
+    </section>
+    <section class="browse">
+      <h2 data-i18n="browseTitle">Browse schemes</h2>
+      <p data-i18n="browseIntro">Every page below is generated from the same verified database.</p>
+      <h3 data-i18n="categories">Categories</h3>
+      <div class="chip-row"><a href="category/agriculture-rural-and-environment/">Agriculture,Rural &amp; Environment</a> <a href="category/banking-financial-services-and-insurance/">Banking,Financial Services and Insurance</a> <a href="category/business-and-entrepreneurship/">Business &amp; Entrepreneurship</a> <a href="category/education-and-learning/">Education &amp; Learning</a> <a href="category/health-and-wellness/">Health &amp; Wellness</a> <a href="category/housing-and-shelter/">Housing &amp; Shelter</a> <a href="category/science-it-and-communications/">Science, IT &amp; Communications</a> <a href="category/skills-and-employment/">Skills &amp; Employment</a> <a href="category/social-welfare-and-empowerment/">Social welfare &amp; Empowerment</a> <a href="category/sports-and-culture/">Sports &amp; Culture</a> <a href="category/transport-and-infrastructure/">Transport &amp; Infrastructure</a> <a href="category/utility-and-sanitation/">Utility &amp; Sanitation</a> <a href="category/women-and-child/">Women and Child</a></div>
+      <h3 data-i18n="states">States</h3>
+      <div class="chip-row"><a href="state/andhra-pradesh/">Andhra Pradesh</a> <a href="state/arunachal-pradesh/">Arunachal Pradesh</a> <a href="state/assam/">Assam</a> <a href="state/bihar/">Bihar</a> <a href="state/chhattisgarh/">Chhattisgarh</a> <a href="state/delhi/">Delhi</a> <a href="state/gujarat/">Gujarat</a> <a href="state/haryana/">Haryana</a> <a href="state/jammu-and-kashmir/">Jammu and Kashmir</a> <a href="state/jharkhand/">Jharkhand</a> <a href="state/karnataka/">Karnataka</a> <a href="state/kerala/">Kerala</a> <a href="state/ladakh/">Ladakh</a> <a href="state/madhya-pradesh/">Madhya Pradesh</a> <a href="state/maharashtra/">Maharashtra</a> <a href="state/manipur/">Manipur</a> <a href="state/meghalaya/">Meghalaya</a> <a href="state/mizoram/">Mizoram</a> <a href="state/nagaland/">Nagaland</a> <a href="state/odisha/">Odisha</a> <a href="state/punjab/">Punjab</a> <a href="state/rajasthan/">Rajasthan</a> <a href="state/sikkim/">Sikkim</a> <a href="state/tamil-nadu/">Tamil Nadu</a> <a href="state/telangana/">Telangana</a> <a href="state/tripura/">Tripura</a> <a href="state/uttar-pradesh/">Uttar Pradesh</a> <a href="state/west-bengal/">West Bengal</a></div>
+    </section>
+    
+  </main>
+  
+    <footer class="site-footer">
+      <p><a href="https://github.com/Nidhi-bhai" data-i18n="footerBuilt">Built by Nidhi Karuturi</a></p>
+    </footer>
+    
+  
+    <script src="config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/match.js"></script>
+    <script src="js/pdf.js"></script>
+    <script src="js/app.js"></script>
+    
+</body>
+</html>
