@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>YojanaMatch — which government scheme am I eligible for?</title>
-  <meta name="description" content="Answer eight questions and see central and state government schemes you may qualify for. Benefits, eligibility, documents, and official apply links, each with a source URL.">
+  <meta name="description" content="Answer eight questions and see which of 239 copied schemes may fit. Documents and official links. Unofficial; verify on myScheme.">
   <link rel="canonical" href="https://nidhi-bhai.github.io/yojana-match/">
   <meta property="og:title" content="YojanaMatch — which government scheme am I eligible for?">
-  <meta property="og:description" content="Answer eight questions and see central and state government schemes you may qualify for. Benefits, eligibility, documents, and official apply links, each with a source URL.">
+  <meta property="og:description" content="Answer eight questions and see which of 239 copied schemes may fit. Documents and official links. Unofficial; verify on myScheme.">
   <meta property="og:url" content="https://nidhi-bhai.github.io/yojana-match/">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0e4d3c">
@@ -31,17 +31,19 @@
       </nav>
     </header>
     <p class="disclaimer" data-i18n="disclaimer">YojanaMatch is not a government website. Names, benefits, eligibility, and links are copied from official portals and can change. Confirm every scheme on the official source before you apply.</p>
+    <p class="disclaimer te-note" data-i18n="teBeta" hidden>Telugu scheme text is a machine translation (beta). Check the English.</p>
     
   <main id="content">
     
-    <p class="lede" data-i18n="tagline">Find every central and state scheme you qualify for.</p>
+    <p class="lede" data-i18n="tagline">See which of 239 central and state schemes may fit you.</p>
     <h1>Which government scheme am I eligible for?</h1>
     <p id="loading" data-i18n="loading">Loading the scheme database…</p>
     <form id="matcher-form" class="panel">
       <div class="questions">
         <div>
           <label for="state" data-i18n="qState">Which state do you live in?</label>
-          <select id="state" name="state" required><option value="">Choose</option><option value="Gujarat">Gujarat</option><option value="Uttarakhand">Uttarakhand</option><option value="Madhya Pradesh">Madhya Pradesh</option><option value="Goa">Goa</option><option value="Puducherry">Puducherry</option><option value="Haryana">Haryana</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Rajasthan">Rajasthan</option><option value="Bihar">Bihar</option><option value="West Bengal">West Bengal</option><option value="Chhattisgarh">Chhattisgarh</option><option value="Jharkhand">Jharkhand</option><option value="Meghalaya">Meghalaya</option><option value="Assam">Assam</option><option value="Kerala">Kerala</option><option value="Maharashtra">Maharashtra</option><option value="Odisha">Odisha</option><option value="Himachal Pradesh">Himachal Pradesh</option><option value="Dadra &amp; Nagar Haveli and Daman &amp; Diu">Dadra &amp; Nagar Haveli and Daman &amp; Diu</option><option value="Karnataka">Karnataka</option><option value="Delhi">Delhi</option><option value="Andhra Pradesh">Andhra Pradesh</option><option value="Jammu and Kashmir">Jammu and Kashmir</option><option value="Uttar Pradesh">Uttar Pradesh</option><option value="Arunachal Pradesh">Arunachal Pradesh</option><option value="Tripura">Tripura</option><option value="Punjab">Punjab</option><option value="Manipur">Manipur</option><option value="Mizoram">Mizoram</option><option value="Sikkim">Sikkim</option><option value="Telangana">Telangana</option><option value="Nagaland">Nagaland</option><option value="Chandigarh">Chandigarh</option><option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option><option value="Lakshadweep">Lakshadweep</option></select>
+          <select id="state" name="state" required><option value="">Choose</option><option value="Gujarat">Gujarat</option><option value="Uttarakhand" data-central-only="true">Uttarakhand (central schemes only)</option><option value="Madhya Pradesh">Madhya Pradesh</option><option value="Goa" data-central-only="true">Goa (central schemes only)</option><option value="Puducherry" data-central-only="true">Puducherry (central schemes only)</option><option value="Haryana">Haryana</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Rajasthan">Rajasthan</option><option value="Bihar">Bihar</option><option value="West Bengal">West Bengal</option><option value="Chhattisgarh">Chhattisgarh</option><option value="Jharkhand">Jharkhand</option><option value="Meghalaya">Meghalaya</option><option value="Assam">Assam</option><option value="Kerala">Kerala</option><option value="Maharashtra">Maharashtra</option><option value="Odisha">Odisha</option><option value="Himachal Pradesh" data-central-only="true">Himachal Pradesh (central schemes only)</option><option value="Dadra &amp; Nagar Haveli and Daman &amp; Diu" data-central-only="true">Dadra &amp; Nagar Haveli and Daman &amp; Diu (central schemes only)</option><option value="Karnataka">Karnataka</option><option value="Delhi">Delhi</option><option value="Andhra Pradesh">Andhra Pradesh</option><option value="Jammu and Kashmir">Jammu and Kashmir</option><option value="Uttar Pradesh">Uttar Pradesh</option><option value="Arunachal Pradesh">Arunachal Pradesh</option><option value="Tripura">Tripura</option><option value="Punjab">Punjab</option><option value="Manipur">Manipur</option><option value="Mizoram">Mizoram</option><option value="Sikkim">Sikkim</option><option value="Telangana">Telangana</option><option value="Nagaland">Nagaland</option><option value="Chandigarh" data-central-only="true">Chandigarh (central schemes only)</option><option value="Andaman and Nicobar Islands" data-central-only="true">Andaman and Nicobar Islands (central schemes only)</option><option value="Lakshadweep" data-central-only="true">Lakshadweep (central schemes only)</option><option value="Ladakh">Ladakh</option></select>
+          <span class="hint" data-i18n="stateHint">A state marked central schemes only has no state scheme in this list yet. Central schemes are still matched.</span>
         </div>
         <div>
           <label for="age" data-i18n="qAge">What is your age?</label>
@@ -107,16 +109,28 @@
             <label><input type="radio" name="residence" value="Urban"> <span data-i18n="Urban">Urban</span></label>
           </div>
         </fieldset>
+        <fieldset class="span-2">
+          <legend data-i18n="qGroups">Do any of these describe you? Leave this blank if none do.</legend>
+          <div class="choices stack">
+            <label><input type="checkbox" name="group" value="ex-serviceman"> <span data-i18n="gEx">Ex-serviceman, or widow of an ex-serviceman</span></label>
+            <label><input type="checkbox" name="group" value="freedom-fighter"> <span data-i18n="gFreedom">Freedom fighter, or an eligible dependent</span></label>
+            <label><input type="checkbox" name="group" value="orphan"> <span data-i18n="gOrphan">Orphan, lost a parent to Covid-19, or ward of a martyred armed-forces or paramilitary member</span></label>
+            <label><input type="checkbox" name="group" value="widow"> <span data-i18n="gWidow">Widow</span></label>
+            <label><input type="checkbox" name="group" value="police-ward"> <span data-i18n="gPolice">Ward or widow of police or Central Armed Police Forces personnel</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="span-2">
+          <legend data-i18n="qListing">Are you on a ration card (AAY or PHH), a family card, or an SECC / below-poverty-line list?</legend>
+          <div class="choices">
+            <label><input type="radio" name="listing" value="yes" required> <span data-i18n="listingYes">Yes</span></label>
+            <label><input type="radio" name="listing" value="no"> <span data-i18n="listingNo">No</span></label>
+            <label><input type="radio" name="listing" value="not-sure"> <span data-i18n="listingUnsure">Not sure</span></label>
+          </div>
+        </fieldset>
       </div>
       <p id="form-error" class="form-error" role="alert"></p>
       <button class="primary" type="submit" data-i18n="submit">Show my schemes</button>
     </form>
-    
-    <div class="ad-slot" data-ad-placeholder="true" role="complementary" aria-label="Advertisement">
-      <span class="ad-label" data-i18n="adLabel">Advertisement</span>
-      <!-- Google AdSense: paste the ad unit here when a publisher id exists. -->
-    </div>
-    
     <div class="toolbar">
       <label class="hint" for="result-filter">Show
         <select id="result-filter">
@@ -133,13 +147,17 @@
     <section class="help-pack" id="help-pack">
       <h2 data-i18n="helpTitle">Application help pack</h2>
       <p class="price">$2</p>
-      <p data-i18n="helpBody">A $2 PDF checklist of the schemes in your results: documents to arrange, the official apply link, and the source to verify. It is a checklist, not a form-filling service, and it does not guarantee approval.</p>
+      <p data-i18n="helpBody">Optional $2 PDF of your confirmed matches: documents, apply link, and source. It is the same checklist already shown free on this page. It is in English. It is not a form-filling service and it does not guarantee approval.</p>
+      <p data-i18n="helpFree">The PDF is the same checklist as the free list on this page. Paying does not add schemes or file an application. You can use the on-page list without PayPal, including from India where PayPal may not take the payment.</p>
+      <p data-i18n="helpEnglish">The PDF is in English.</p>
+      <p data-i18n="helpRefund">For a refund, email nidhi69n@gmail.com with your PayPal order id.</p>
       <div id="paypal-button"></div>
-      <p id="paypal-note" data-i18n="helpNeedsMatch">Answer the questions first. The checklist is built from the schemes you match.</p>
+      <p id="paypal-note" data-i18n="helpNeedsMatch">Answer the questions first. The PDF lists only confirmed matches.</p>
+      <div id="saved-orders"></div>
     </section>
     <section class="browse">
       <h2 data-i18n="browseTitle">Browse schemes</h2>
-      <p data-i18n="browseIntro">Every page below is generated from the same verified database.</p>
+      <p data-i18n="browseIntro">These pages are copied from myScheme. This is a subset, not every scheme in India.</p>
       <h3 data-i18n="categories">Categories</h3>
       <div class="chip-row"><a href="category/agriculture-rural-and-environment/">Agriculture,Rural &amp; Environment</a> <a href="category/banking-financial-services-and-insurance/">Banking,Financial Services and Insurance</a> <a href="category/business-and-entrepreneurship/">Business &amp; Entrepreneurship</a> <a href="category/education-and-learning/">Education &amp; Learning</a> <a href="category/health-and-wellness/">Health &amp; Wellness</a> <a href="category/housing-and-shelter/">Housing &amp; Shelter</a> <a href="category/science-it-and-communications/">Science, IT &amp; Communications</a> <a href="category/skills-and-employment/">Skills &amp; Employment</a> <a href="category/social-welfare-and-empowerment/">Social welfare &amp; Empowerment</a> <a href="category/sports-and-culture/">Sports &amp; Culture</a> <a href="category/transport-and-infrastructure/">Transport &amp; Infrastructure</a> <a href="category/utility-and-sanitation/">Utility &amp; Sanitation</a> <a href="category/women-and-child/">Women and Child</a></div>
       <h3 data-i18n="states">States</h3>

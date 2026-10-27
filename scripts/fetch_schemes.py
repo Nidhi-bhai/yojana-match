@@ -17,6 +17,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(__file__))
+from eligibility_rules import annotate_scheme  # noqa: E402
+from link_fixes import fix_scheme_links  # noqa: E402
 from scheme_text import (  # noqa: E402
     age_bounds,
     benefit_amount,
@@ -536,7 +538,7 @@ def build_scheme(client: Client, meta, facets):
             "genderCasteQuote": quote,
         }, eligibility),
     }
-    return scheme
+    return fix_scheme_links(annotate_scheme(scheme))
 
 
 def facet_value_map(client: Client, identifier, values, selected):

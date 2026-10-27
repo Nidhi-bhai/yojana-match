@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const path = require("path");
-const { explain, matchAll } = require("../docs/js/match.js");
+const { explain, matchAll, possibleAll } = require("../docs/js/match.js");
 const { buildChecklistPdf } = require("../docs/js/pdf.js");
 
 function scheme(overrides) {
@@ -45,8 +45,11 @@ const farmer = {
   residence: "Rural",
 };
 
-test("open central scheme matches a farmer", () => {
-  assert.equal(explain(scheme(), farmer).ok, true);
+test("an open central scheme is a check, not a match", () => {
+  const result = explain(scheme(), farmer);
+  assert.equal(result.status, "possible");
+  assert.equal(result.ok, false);
+  assert.ok(result.checks.some((item) => item.code === "broad"));
 });
 
 test("another state's scheme is excluded", () => {
@@ -88,8 +91,11 @@ test("age and income use only stated bounds", () => {
   assert.equal(inside.ok, true);
   assert.equal(inside.notes.includes("income-check"), false);
   const straddle = explain(capped, Object.assign({}, farmer, { incomeBand: "2.5-5l" }));
-  assert.equal(straddle.ok, true);
-  assert.ok(straddle.notes.includes("income-check"));
+  assert.equal(straddle.status, "possible");
+  assert.equal(straddle.ok, false);
+  assert.ok(straddle.checks.some((item) => item.code === "income-check"));
+  const above = explain(capped, Object.assign({}, farmer, { incomeBand: "above-8l" }));
+  assert.equal(above.ok, false);
 });
 
 test("male SC/ST rule follows the official sentence", () => {
@@ -115,10 +121,13 @@ test("male SC/ST rule follows the official sentence", () => {
   assert.equal(explain(row, Object.assign({}, woman, { gender: "Transgender" })).ok, false);
 });
 
-test("bpl schemes stay with the lowest income band", () => {
-  const row = scheme({ criteria: { genders: ["All"], castes: ["All"], residences: ["Both"], occupations: ["All"], employment: ["All"], disability: "No", studentOnly: false, bplOnly: true } });
-  assert.equal(explain(row, farmer).ok, true);
-  assert.equal(explain(row, Object.assign({}, farmer, { incomeBand: "2.5-5l" })).ok, false);
+test("bpl and ration-card schemes follow the listing answer", () => {
+  const row = scheme({ criteria: { genders: ["All"], castes: ["All"], residences: ["Both"], occupations: ["All"], employment: ["All"], disability: "No", studentOnly: false, bplOnly: true, listingRequired: true, listingDetail: false } });
+  assert.equal(explain(row, Object.assign({}, farmer, { listing: "yes" })).status, "match");
+  assert.equal(explain(row, Object.assign({}, farmer, { listing: "no" })).status, "no");
+  assert.equal(explain(row, farmer).status, "possible");
+  const detailed = scheme({ criteria: { genders: ["All"], castes: ["All"], residences: ["Both"], occupations: ["All"], employment: ["All"], disability: "No", studentOnly: false, bplOnly: false, listingRequired: true, listingDetail: true, listingQuote: "SECC 2011" } });
+  assert.equal(explain(detailed, Object.assign({}, farmer, { listing: "yes" })).status, "possible");
 });
 
 test("a farmer scheme tagged Employed still matches farmers", () => {
@@ -146,13 +155,45 @@ test("employment separates salaried work from self-employment", () => {
 });
 
 test("checklist pdf is a real pdf and does not invent a benefit", () => {
-  const bytes = buildChecklistPdf(farmer, [scheme({ benefitAmount: "" })]);
+  const bytes = buildChecklistPdf(farmer, [scheme({ benefitAmount: "" })], "ORDER123");
   const text = Buffer.from(bytes).toString("latin1");
   assert.ok(text.startsWith("%PDF-1.4"));
   assert.ok(text.includes("Sample Scheme"));
   assert.ok(text.includes("not a government website"));
   assert.ok(text.includes("A single amount was not stated"));
+  assert.ok(text.includes("This PDF is in English."));
+  assert.ok(text.includes("ORDER123"));
+  assert.ok(text.includes("nidhi69n@gmail.com"));
+  assert.ok(text.includes("refund"));
+  assert.ok(text.includes("Copied from myScheme on"));
   assert.ok(text.includes("%%EOF"));
+});
+
+test("closed schemes are not matches", () => {
+  const row = scheme({ closeDate: "2025-03-31" });
+  assert.equal(explain(row, farmer).status, "closed");
+  assert.equal(matchAll([row], farmer).length, 0);
+  assert.equal(possibleAll([row], farmer).length, 0);
+});
+
+test("special groups stay hidden until the person opts in", () => {
+  const row = scheme({
+    criteria: {
+      genders: ["All"],
+      castes: ["All"],
+      residences: ["Both"],
+      occupations: ["All"],
+      employment: ["All"],
+      disability: "No",
+      studentOnly: false,
+      bplOnly: false,
+      ageMin: 18,
+      specialGroups: ["freedom-fighter"],
+      specialGroupMode: "any",
+    },
+  });
+  assert.equal(explain(row, farmer).status, "no");
+  assert.equal(explain(row, Object.assign({}, farmer, { groups: ["freedom-fighter"] })).status, "match");
 });
 
 test("database profiles are consistent when the catalog is present", () => {
@@ -179,11 +220,53 @@ test("database profiles are consistent when the catalog is present", () => {
   const profiles = require("./profiles.json");
   for (const item of profiles) {
     const matched = new Set(matchAll(payload.schemes, item.profile).map((row) => row.slug));
-    for (const slug of item.mustInclude) {
-      assert.ok(matched.has(slug), `${item.id} should include ${slug}`);
+    const possible = new Set(possibleAll(payload.schemes, item.profile).map((row) => row.slug));
+    for (const slug of item.mustMatch) {
+      assert.ok(matched.has(slug), `${item.id} should match ${slug}`);
+      assert.equal(possible.has(slug), false);
+    }
+    for (const slug of item.mustPossible) {
+      assert.ok(possible.has(slug), `${item.id} should list ${slug} as possible`);
+      assert.equal(matched.has(slug), false);
     }
     for (const slug of item.mustExclude) {
-      assert.equal(matched.has(slug), false, `${item.id} should exclude ${slug}`);
+      assert.equal(matched.has(slug), false, `${item.id} should not match ${slug}`);
+      assert.equal(possible.has(slug), false, `${item.id} should not suggest ${slug}`);
     }
+  }
+  const states = ["Uttar Pradesh", "Bihar", "Maharashtra", "Karnataka", "Telangana", "Tamil Nadu", "West Bengal"];
+  const ages = [16, 25, 35, 50, 70];
+  const incomes = ["under-1l", "2.5-5l", "above-8l"];
+  const occupations = ["farmer", "student", "msme", "woman_entrepreneur", "salaried", "unemployed"];
+  let profilesSeen = 0;
+  const counts = {};
+  for (const state of states) {
+    for (const age of ages) {
+      for (const gender of ["Female", "Male"]) {
+        for (const incomeBand of incomes) {
+          for (const occupation of occupations) {
+            for (const caste of ["general", "sc"]) {
+              for (const residence of ["Rural", "Urban"]) {
+                profilesSeen += 1;
+                const profile = {
+                  state, age, gender, incomeBand, occupation, caste, residence,
+                  disability: false, groups: [], listing: "not-sure",
+                };
+                for (const row of matchAll(payload.schemes, profile)) {
+                  counts[row.slug] = (counts[row.slug] || 0) + 1;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.equal(profilesSeen, 5040);
+  const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const top = ranked[0] ? ranked[0][1] / profilesSeen : 0;
+  assert.ok(top < 0.8, `a scheme matched ${(top * 100).toFixed(1)}% of profiles`);
+  for (const slug of ["ab-pmjay", "inspire-she", "aicte-ssss", "sssps", "sui", "pmjdy", "pm-gkay", "pmbjp"]) {
+    assert.equal(counts[slug] || 0, 0, slug);
   }
 });

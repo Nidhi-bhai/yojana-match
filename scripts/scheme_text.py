@@ -7,7 +7,7 @@ CURRENCY_RE = re.compile(r"(₹|Rs\.?|INR)\s*[0-9]")
 INCOME_SENTENCE_RE = re.compile(r"income", re.I)
 INCOME_RELATION_RE = re.compile(
     r"(does not exceed|do not exceed|shall not exceed|should not exceed|must not exceed|"
-    r"not exceed|not more than|no more than|less than|below|up to|upto|ceiling|"
+    r"not exceed|not more than|not be more than|no more than|less than|below|up to|upto|ceiling|"
     r"or less|or below|within)",
     re.I,
 )
